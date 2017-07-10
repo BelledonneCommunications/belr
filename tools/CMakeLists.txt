@@ -26,7 +26,7 @@ else()
 	set(BELR_LIBRARIES_FOR_TOOLS belr-static)
 endif()
 
-foreach(EXECTUABLE belr-parse belr-demo)
+foreach(EXECTUABLE belr-parse Selector-test Sequence-test ExclusiveSelector-test CharRecognizer-test Loop-test CharRange-test RecognizerPointer-test Literal-test BasicGrammar-test GrammarDump-test exploreGrammar)
 	set(SOURCE_FILES_CXX ${EXECTUABLE}.cc)
 	bc_apply_compile_flags(SOURCE_FILES_CXX STRICT_OPTIONS_CPP STRICT_OPTIONS_CXX)
 	add_executable(${EXECTUABLE} ${SOURCE_FILES_CXX})

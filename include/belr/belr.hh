@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <iostream>
 
 
 #ifdef _MSC_VER
@@ -22,7 +23,7 @@
 #endif
 
 namespace belr{
-	
+
 BELR_PUBLIC std::string tolower(const std::string &str);
 
 class ParserContextBase;
@@ -47,6 +48,12 @@ public:
 	void optimize();
 	void optimize(int recursionLevel);
 	virtual ~Recognizer() { }
+
+
+	virtual void save(std::ofstream& fichier, long &savePos)=0;
+	virtual bool equal(const std::shared_ptr<Recognizer> &CR)=0;
+	//DEBUG FUNCTION
+	virtual void printtype()=0;
 protected:
 	/*returns true if the transition map is complete, false otherwise*/
 	virtual bool _getTransitionMap(TransitionMap *mask);
@@ -60,17 +67,30 @@ protected:
 class CharRecognizer : public Recognizer{
 public:
 	CharRecognizer(int to_recognize, bool caseSensitive=false);
+	void save(std::ofstream& fichier, long &savePos);
+	static std::shared_ptr<CharRecognizer> load(std::ifstream& fichier, long &loadPos);
+	bool equal(const std::shared_ptr<Recognizer> &CR);
+
+	//DEBUG FUNCTION
+	void printtype();
 private:
 	virtual void _optimize(int recursionLevel);
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
 	int mToRecognize;
 	bool mCaseSensitive;
+
 };
 
 class Selector : public Recognizer{
 public:
 	Selector();
 	std::shared_ptr<Selector> addRecognizer(const std::shared_ptr<Recognizer> &element);
+	void save(std::ofstream& fichier, long &savePos);
+	static std::shared_ptr<Selector> load(std::ifstream& fichier, long &loadPos);
+	bool equal(const std::shared_ptr<Recognizer> &SEL);
+	//DEBUG FUNCTION
+	void printtype();
+
 protected:
 	virtual void _optimize(int recursionLevel);
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
@@ -84,6 +104,13 @@ protected:
 class ExclusiveSelector : public Selector{
 public:
 	ExclusiveSelector();
+	void save(std::ofstream& fichier, long &savePos);
+	static std::shared_ptr<ExclusiveSelector> load(std::ifstream& fichier, long &loadPos);
+	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
+	//DEBUG FUNCTION
+	void printtype();
+
+
 private:
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
 };
@@ -93,6 +120,13 @@ public:
 	Sequence();
 	std::shared_ptr<Sequence> addRecognizer(const std::shared_ptr<Recognizer> &element);
 	virtual bool _getTransitionMap(TransitionMap *mask);
+	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	static std::shared_ptr<Sequence> load(std::ifstream& fichier, long &loadPos); //MODIFIE PAR IYED
+	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
+	//DEBUG FUNCTION
+	void printtype();
+
+
 protected:
 	virtual void _optimize(int recursionLevel);
 private:
@@ -105,6 +139,13 @@ public:
 	Loop();
 	std::shared_ptr<Loop> setRecognizer(const std::shared_ptr<Recognizer> &element, int min=0, int max=-1);
 	virtual bool _getTransitionMap(TransitionMap *mask);
+	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	static std::shared_ptr<Loop> load(std::ifstream& fichier, long &loadPos); //MODIFIE PAR IYED
+	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
+	//DEBUG FUNCTION
+	void printtype();
+
+
 protected:
 	virtual void _optimize(int recursionLevel);
 private:
@@ -126,6 +167,13 @@ public:
 class CharRange : public Recognizer{
 public:
 	CharRange(int begin, int end);
+	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	static std::shared_ptr<CharRange> load(std::ifstream& fichier, long &loadPos); //MODIFIE PAR IYED
+	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
+	//DEBUG FUNCTION
+	void printtype();
+
+
 private:
 	virtual void _optimize(int recursionLevel);
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
@@ -136,6 +184,13 @@ class Literal : public Recognizer{
 public:
 	Literal(const std::string &lit);
 	virtual bool _getTransitionMap(TransitionMap *mask);
+	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	static std::shared_ptr<Literal> load(std::ifstream& fichier, long &loadPos); //MODIFIE PAR IYED
+	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
+	//DEBUG FUNCTION
+	void printtype();
+
+
 private:
 	virtual void _optimize(int recursionLevel);
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
@@ -154,6 +209,12 @@ public:
 	RecognizerPointer();
 	std::shared_ptr<Recognizer> getPointed();
 	void setPointed(const std::shared_ptr<Recognizer> &r);
+	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	static std::shared_ptr<RecognizerPointer> load(std::ifstream& fichier, long &loadPos); //MODIFIE PAR IYED
+	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
+	//DEBUG FUNCTION
+	void printtype();
+
 private:
 	virtual void _optimize(int recursionLevel);
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
@@ -169,9 +230,9 @@ public:
 	 * Initialize an empty grammar, giving a name for debugging.
 	**/
 	BELR_PUBLIC Grammar(const std::string &name);
-	
+
 	BELR_PUBLIC ~Grammar();
-	
+
 	/**
 	 * Include another grammar into this grammar.
 	**/
@@ -209,7 +270,7 @@ public:
 	BELR_PUBLIC std::shared_ptr<Recognizer> findRule(const std::string &name);
 	/**
 	 * Find a rule from the grammar, given its name.
-	 * Unlike findRule(), getRule() never returns NULL. 
+	 * Unlike findRule(), getRule() never returns NULL.
 	 * If the rule is not (yet) defined, it returns an undefined pointer, that will be set later if the rule gets defined.
 	 * This mechanism is required to allow defining rules in any order, and defining rules that call themselve recursively.
 	 * @param name the name of the rule to get
@@ -226,12 +287,24 @@ public:
 	 * The optimization step consists in checking whether belr::Selector objects in the grammar are exclusive or not.
 	 * A selector is said exclusive when a single sub-rule can match. Knowing this in advance optimizes the processing because no branch
 	 * context is to be created to explore the different choices of the selector recognizer.
-	**/ 
+	**/
 	void optimize();
 	/**
 	 * Return the number of rules in this grammar.
 	**/
 	int getNumRules()const;
+
+//Save functions
+	void createGrammarDump(std::string dumpFileName);
+	void saveRulesMap(std::ofstream &outFile);
+//Load functions
+	static std::shared_ptr<Grammar> createLoadedGrammar(std::string fileName);
+	static std::map<std::string,std::shared_ptr<Recognizer>> loadRulesMap(std::ifstream &inFile);
+//comare functions
+	bool equal(std::shared_ptr<Grammar> &gramCompared);
+//debug functions
+	void debugGrammar();
+
 private:
 	void assignRule(const std::string &name, const std::shared_ptr<Recognizer> &rule);
 	void _extendRule(const std::string &name, const std::shared_ptr<Recognizer> &rule);
