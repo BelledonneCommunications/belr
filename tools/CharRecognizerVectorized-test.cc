@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include <memory>
 //#include <chrono>
+#include <fstream>
+#include <string>
 
 
 using namespace belr;
@@ -17,6 +19,23 @@ using namespace std;
 
 long savePosition = 0;
 long loadPosition = 0;
+
+template<typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
 
 
 int main(int argc, char *argv[]){
@@ -39,19 +58,23 @@ int main(int argc, char *argv[]){
 //SAVE AND LOAD
 	ofstream ofichier ("test-char.bin", ios::out | ios::app | ios::binary);
   character->save(ofichier, savePosition);
+  character2->save(ofichier, savePosition);
 	ofichier.close();
+
+
 
 	ifstream ifichier ("test-char.bin", ios::in | ios::binary);
-	const shared_ptr<CharRecognizer> characterLoaded = CharRecognizer::load(ifichier, loadPosition);
-	ifichier.close();
 
-	ofichier = ofstream("test-char.bin", ios::out | ios::app | ios::binary);
+  string contenu;  // déclaration d'une chaîne qui contiendra la ligne lue
+  getline(ifichier, contenu);  // on met dans "contenu" la ligne
 
-	character2->save(ofichier, savePosition);
-	ofichier.close();
+  std::vector<std::string> result = split(contenu, ' ');
+  vector<string>::const_iterator i = result.begin();
 
-	ifichier = ifstream("test-char.bin", ios::in | ios::binary);
-	const shared_ptr<CharRecognizer> characterLoaded2 = CharRecognizer::load(ifichier, loadPosition);
+
+  cout << "DEBUG : Parsed string" << contenu << endl;
+  const shared_ptr<CharRecognizer> characterLoaded = CharRecognizer::loadVect(i);
+	const shared_ptr<CharRecognizer> characterLoaded2 = CharRecognizer::loadVect(i);
 	ifichier.close();
 
 	cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;

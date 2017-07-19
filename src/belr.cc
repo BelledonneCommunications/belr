@@ -5,10 +5,22 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-
+#include <boost/tokenizer.hpp>
+#include <string>
+#include <vector>
+#include <stdio.h>
+#include <sstream>
+#include <cstring>
 
 using namespace std;
 using namespace belr;
+
+std::string parseStr(std::string s, long &strlPos){
+  size_t pos = s.find(" ",strlPos);
+  std::string ns = s.substr(strlPos, pos-strlPos);
+  strlPos  = pos+1;
+	return ns;
+}
 
 
 
@@ -147,6 +159,62 @@ void CharRecognizer::save(std::ofstream& outFile, long &savePos){
 		}
 }
 
+/**
+    Saves Char regognizer attributes in a file
+		write format is : TAG SPACE mCaseSensitive : mToRecognize |
+		TAG is "CR"
+    @param std:: ofstream out stream of the file.
+    @return void
+*/
+void CharRecognizer::saveString(std::ofstream& outFile, long &savePos){
+	outFile.seekp(savePos, ios::beg);
+
+		if(outFile){
+			outFile << "CR" << " " << mCaseSensitive  << ":" <<	mToRecognize << "|";
+			savePos = outFile.tellp();
+		}
+		else{
+			cerr << "ERROR writing to file : output stream unavailable" << endl;
+		}
+}
+
+/**
+    Loads Char regognizer attributes from a file
+
+    @param std::string String containing the recognizer's description.
+    @return shared_ptr<CharRecognizer>
+*/
+shared_ptr<CharRecognizer> CharRecognizer::loadString(std::string& inLine){
+
+	if(!inLine.empty()){
+
+		typedef boost::tokenizer<boost::char_separator<char>>tokenizer;
+		boost::char_separator<char> sep(" ");
+
+		tokenizer tokens(inLine, sep);
+//		for (tokenizer::iterator tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter)
+//			std::cout <<"DEBUG: parsed element"<<  "<" << *tok_iter << "> ";
+		tokenizer::iterator tok_iter = tokens.begin();
+			cout << endl;
+		if (*(tok_iter) == "CR"){
+			string temp = *(++tok_iter);
+			bool mCaseSensitive_loaded = stoi(temp);
+		 	temp = *(++tok_iter);
+			int mToRecognize_loaded = stoi(temp);
+
+
+
+			return make_shared<CharRecognizer>(mToRecognize_loaded , mCaseSensitive_loaded);
+		}
+		else
+			cerr << "ERROR reading file : no CHAR RECOGNIZER tag found" << endl;
+
+	}
+	else
+		cerr << "ERROR reading file : lecture du String impossible" << endl;
+		return NULL;
+
+}
 
 /**
     Loads Char regognizer attributes from a file
@@ -177,6 +245,62 @@ shared_ptr<CharRecognizer> CharRecognizer::load(std::ifstream& inFile, long &loa
 	}
 	return NULL;
 }
+
+/**
+    Loads Char regognizer attributes from a file
+
+    @param std::string out stream of the file.
+    @return shared_ptr<CharRecognizer>
+*/
+shared_ptr<CharRecognizer> CharRecognizer::loadStringed(std::string& inLine, long &loadPos){
+
+	if(!inLine.empty()){
+
+		std::string tag = parseStr(inLine, loadPos); //parses the first element of the space separated string starting from strlPos
+//		cout << "DEBUG : tag CR :" << tag << " | ";
+			if (tag == "CR"){
+				string temp = parseStr(inLine, loadPos);
+		//		cout << "content : <" << temp <<">,<";
+				bool mCaseSensitive_loaded  = stoi(temp);
+				temp = parseStr(inLine, loadPos);
+	//			cout << temp << ">"<< endl;
+				int mToRecognize_loaded = stoi(temp);
+				return make_shared<CharRecognizer>(mToRecognize_loaded, mCaseSensitive_loaded);
+			}
+			else{
+				cerr << "ERROR no CHAR RECOGNIZER tag found" << endl;
+			}
+		}
+	else{
+		cerr << "ERROR loaded string is empty" << endl;
+	}
+	return NULL;
+}
+
+
+shared_ptr<CharRecognizer> CharRecognizer::loadVect(std::vector<string>::const_iterator &inIter){
+	//cout << "DEBUG : tag : <" << *(inIter) << ">";
+	if (*(inIter) == "CR"){
+		string temp = *(++inIter);
+	//	cout << " | caseSens : <" << *(inIter) << "> | ";
+
+		bool mCaseSensitive_loaded = stoi(temp);
+	 	temp = *(++inIter);
+	//	cout << "Caracter : <" << *(inIter) << ">"<< endl;
+
+		int mToRecognize_loaded = stoi(temp);
+		++inIter;
+		return make_shared<CharRecognizer>(mToRecognize_loaded , mCaseSensitive_loaded);
+	}
+	else
+		cerr << "ERROR reading file : no CHAR RECOGNIZER tag found" << endl;
+	return NULL;
+}
+
+
+
+
+
 
 
 bool CharRecognizer::equal(const shared_ptr<Recognizer> &CR){
@@ -267,6 +391,40 @@ void Selector::_optimize(int recursionLevel){
 		mIsExclusive=true;
 	}
 }
+/**
+    Saves Selector attributes in a file
+		write format is : TAG mIsExclusive numberOfElements :: Element1 Element2 Element3
+		each Element is a recognizer meaning it has got its own format
+		TAG is "SEL"
+    @param std:: ofstream out stream of the file.
+    @return void
+*/
+void Selector::saveString(std::ofstream& outFile, long &savePos){
+	outFile.seekp(savePos, ios::beg);
+
+		if(outFile){
+			outFile << "SEL" << " " << mIsExclusive  << " ";
+			savePos = outFile.tellp();
+			int recognizerListSize = 0;
+
+			//the number of elements in the recognizer list is needed when loading the Selector afterwards
+			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
+				recognizerListSize++ ;
+			}
+
+
+			outFile << recognizerListSize << ":";
+
+			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
+						(*it)->save(outFile, savePos);
+
+ 			}
+		}
+		else{
+			cerr << "ecriture dans le fichier impossibe" << endl;
+		}
+}
+
 
 /**
     Saves Selector attributes in a file
@@ -302,6 +460,57 @@ void Selector::save(std::ofstream& outFile, long &savePos){
 		}
 }
 
+shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inIter){
+//	cout << "DEBUG : tag : <" << *(inIter) << ">";
+
+	shared_ptr<Selector> selector_reloaded = NULL;
+
+	if(*inIter == "SEL"){
+		list<shared_ptr<Recognizer>> mElements_loaded;
+		bool mIsExclusive_loaded = stoi(*(++inIter));
+//		cout << " | IsEx : <" << *(inIter) << "> | ";
+		int recognizerListSize = stoi(*(++inIter));
+//		cout << "NbElem : <" << *(inIter) << ">"<< endl;
+		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
+		int i=0;
+		++inIter;
+
+		for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
+      if (*(inIter) == "CR"){
+				selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
+			}
+      else if(*(inIter) == "SEQ"){
+      	selector_reloaded->addRecognizer(Sequence::loadVect(inIter));
+      }
+      else if(*(inIter) == "LOOP"){
+        selector_reloaded->addRecognizer(Loop::loadVect(inIter));
+      }
+      else if(*(inIter) == "XCR"){
+        selector_reloaded->addRecognizer(CharRange::loadVect(inIter));
+      }
+      else if(*(inIter) == "LIT"){
+        selector_reloaded->addRecognizer(Literal::loadVect(inIter));
+      }
+      else if(*(inIter) == "XSEL"){
+      	selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
+      }
+      else if(*(inIter) == "SEL"){
+      	selector_reloaded->addRecognizer(Selector::loadVect(inIter));
+      }
+      else if(*(inIter) == "RECP"){
+        selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
+      }
+      else
+							std::cerr << "ERROR : inside selector Type not recognized" << '\n';
+			i++;
+				}
+			}
+			else
+				cerr << "ERROR : No SELECTOR tag found" << endl;
+
+	return selector_reloaded;
+
+}
 /**
     Loads Selector attributes from a file
 
@@ -515,6 +724,57 @@ shared_ptr<ExclusiveSelector> ExclusiveSelector::load(std::ifstream& inFile, lon
 	return dynamic_pointer_cast<ExclusiveSelector>(selector_reloaded);
 }
 
+shared_ptr<ExclusiveSelector> ExclusiveSelector::loadVect(std::vector<string>::const_iterator &inIter){
+//	cout << "DEBUG : tag : <" << *(inIter) << ">";
+
+	shared_ptr<Selector> selector_reloaded = NULL;
+
+	if(*inIter == "XSEL"){
+		list<shared_ptr<Recognizer>> mElements_loaded;
+		bool mIsExclusive_loaded = stoi(*(++inIter));
+//		cout << " | IsEx : <" << *(inIter) << "> | ";
+		int recognizerListSize = stoi(*(++inIter));
+	//	cout << "NbElem : <" << *(inIter) << ">"<< endl;
+		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
+		int i=0;
+		++inIter;
+		for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
+	//		cout << "DEBUG : tag inside : <" << *inIter << ">" << endl;
+			if (*(inIter) == "CR"){
+				selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
+			}
+			else if(*(inIter) == "XSEL"){
+				selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
+			}
+			else if(*(inIter) == "SEL"){
+				selector_reloaded->addRecognizer(Selector::loadVect(inIter));
+			}
+			else if(*(inIter) == "SEQ"){
+      	selector_reloaded->addRecognizer(Sequence::loadVect(inIter));
+      }
+      else if(*(inIter) == "LOOP"){
+        selector_reloaded->addRecognizer(Loop::loadVect(inIter));
+      }
+      else if(*(inIter) == "XCR"){
+        selector_reloaded->addRecognizer(CharRange::loadVect(inIter));
+      }
+      else if(*(inIter) == "LIT"){
+        selector_reloaded->addRecognizer(Literal::loadVect(inIter));
+      }
+      else if(*(inIter) == "RECP"){
+      	selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
+      }
+      else
+							std::cerr << "ERROR : Type not recognized" << '\n';
+			i++;
+				}
+			}
+			else
+				cerr << "ERROR : No SELECTOR tag found" << endl;
+
+			return dynamic_pointer_cast<ExclusiveSelector>(selector_reloaded);
+}
+
 
 bool ExclusiveSelector::equal(const std::shared_ptr<Recognizer> &SEL){
 
@@ -667,6 +927,55 @@ shared_ptr<Sequence> Sequence::load(std::ifstream& inFile, long &loadPos){
 	}
 	return sequence_reloaded;
 }
+
+shared_ptr<Sequence> Sequence::loadVect(std::vector<string>::const_iterator &inIter){
+	//cout << "DEBUG : tag : <" << *(inIter) << ">";
+
+	shared_ptr<Sequence> sequence_reloaded = NULL; //type de retour
+
+	if(*inIter == "SEQ"){
+		list<shared_ptr<Recognizer>> mElements_loaded;
+		int recognizerListSize = stoi(*(++inIter));
+	//	cout << " | NbElem : <" << *(inIter) << ">"<< endl;
+		sequence_reloaded = make_shared<Sequence>();
+		int i=0;
+		++inIter;
+		for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
+			if (*(inIter) == "CR"){
+				sequence_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
+			}
+			else if(*(inIter) == "XSEL"){
+				sequence_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
+			}
+			else if(*(inIter) == "SEL"){
+				sequence_reloaded->addRecognizer(Selector::loadVect(inIter));
+			}
+			else if(*(inIter) == "SEQ"){
+      	sequence_reloaded->addRecognizer(Sequence::loadVect(inIter));
+      }
+      else if(*(inIter) == "LOOP"){
+        sequence_reloaded->addRecognizer(Loop::loadVect(inIter));
+      }
+      else if(*(inIter) == "XCR"){
+        sequence_reloaded->addRecognizer(CharRange::loadVect(inIter));
+      }
+      else if(*(inIter) == "LIT"){
+        sequence_reloaded->addRecognizer(Literal::loadVect(inIter));
+      }
+      else if(*(inIter) == "RECP"){
+      	sequence_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
+      }
+      else
+							std::cerr << "ERROR : Type not recognized" << '\n';
+			i++;
+				}
+			}
+			else
+				cerr << "ERROR : No SELECTOR tag found" << endl;
+
+			return (sequence_reloaded);
+}
+
 
 
 bool Sequence::equal(const std::shared_ptr<Recognizer> &SEQ){
@@ -835,6 +1144,55 @@ shared_ptr<Loop> Loop::load(std::ifstream& inFile, long &loadPos){
 	return loop_reloaded;
 }
 
+shared_ptr<Loop> Loop::loadVect(std::vector<string>::const_iterator &inIter){
+//	cout << "DEBUG : tag : <" << *(inIter) << ">";
+
+	shared_ptr<Loop> loop_reloaded = NULL; //type de retour
+
+	if(*inIter == "LOOP"){
+//		list<shared_ptr<Recognizer>> mElements_loaded;
+    int mMin_loaded =  stoi(*(++inIter));
+//    cout << " | mMin : <" << *(inIter) << ">"<< endl;
+
+    int mMax_loaded =  stoi(*(++inIter));
+
+	//	cout << " | mMax : <" << *(inIter) << ">"<< endl;
+    loop_reloaded = make_shared<Loop>();
+		++inIter;
+			if (*(inIter) == "CR"){
+        loop_reloaded->setRecognizer(CharRecognizer::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+			}
+			else if(*(inIter) == "XSEL"){
+        loop_reloaded->setRecognizer(ExclusiveSelector::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+			}
+			else if(*(inIter) == "SEL"){
+        loop_reloaded->setRecognizer(Selector::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+			}
+			else if(*(inIter) == "SEQ"){
+        loop_reloaded->setRecognizer(Sequence::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+      }
+      else if(*(inIter) == "LOOP"){
+        loop_reloaded->setRecognizer(Loop::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+      }
+      else if(*(inIter) == "XCR"){
+        loop_reloaded->setRecognizer(CharRange::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+      }
+      else if(*(inIter) == "LIT"){
+        loop_reloaded->setRecognizer(Literal::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+      }
+      else if(*(inIter) == "RECP"){
+        loop_reloaded->setRecognizer(RecognizerPointer::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
+      }
+      else
+				std::cerr << "ERROR : Type not recognized" << '\n';
+		}
+		else
+			cerr << "ERROR : No SELECTOR tag found" << endl;
+
+	return (loop_reloaded);
+}
+
+
 
 bool Loop::equal(const std::shared_ptr<Recognizer> &LOP){
 	const shared_ptr<Loop> LOP_local = dynamic_pointer_cast<Loop>(LOP);
@@ -903,6 +1261,25 @@ shared_ptr<CharRange> CharRange::load(std::ifstream& inFile, long &loadPos){
 	}
 	return NULL;
 }
+
+shared_ptr<CharRange> CharRange::loadVect(std::vector<string>::const_iterator &inIter){
+//  cout << "DEBUG : tag : <" << *(inIter) << ">";
+
+	if(*(inIter) == "XCR"){
+    int mBegin_loaded =  stoi(*(++inIter));
+//    cout << " | mMin : <" << *(inIter) << ">"<< endl;
+
+    int mEnd_loaded =  stoi(*(++inIter));
+  //  cout << " | mMin : <" << *(inIter) << ">"<< endl;
+    ++inIter;
+    return make_shared<CharRange>(mBegin_loaded, mEnd_loaded);
+  }
+	else{
+		cerr << "ERROR : no CHARRANGE tag found" << endl;
+	}
+  return NULL;
+}
+
 
 
 bool CharRange::equal(const shared_ptr<Recognizer> &XCR){
@@ -996,6 +1373,23 @@ shared_ptr<Literal> Literal::load(std::ifstream& inFile, long &loadPos){
 		}
 		return NULL;
 	}
+
+
+shared_ptr<Literal> Literal::loadVect(std::vector<string>::const_iterator &inIter){
+//  cout << "DEBUG : tag : <" << *(inIter) << ">";
+
+  if((*inIter) == "LIT"){
+    string mliteral_loaded =  *(++inIter);
+//    cout << " | string : <" << *(inIter) << ">"<< endl;
+    ++inIter;
+    return make_shared<Literal>(mliteral_loaded);
+  }
+	else{
+  	cerr << "ERROR : no LITERAL tag found" << endl;
+  }
+  return NULL;
+}
+
 
 
 bool Literal::equal(const shared_ptr<Recognizer> &LIT){
@@ -1141,6 +1535,50 @@ shared_ptr<RecognizerPointer> RecognizerPointer::load(std::ifstream& inFile, lon
 	else{
 		cerr << "lecture du fichier impossible" << endl;
 	}
+	return recognpointer_reloaded;
+}
+
+shared_ptr<RecognizerPointer> RecognizerPointer::loadVect(std::vector<string>::const_iterator &inIter){
+//  cout << "DEBUG : tag : <" << *(inIter) << ">";
+	shared_ptr<RecognizerPointer> recognpointer_reloaded = NULL; //type de retour
+
+	if((*inIter) == "RECP"){
+    ++inIter;
+    recognpointer_reloaded = make_shared<RecognizerPointer>();
+//    cout << " | taginside : <" << *(inIter) << ">" << endl;
+
+					if ((*inIter) == "CR"){
+							recognpointer_reloaded->setPointed(CharRecognizer::loadVect(inIter)); //houni errue
+					}
+					else if ((*inIter) == "SEL"){
+							recognpointer_reloaded->setPointed(Selector::loadVect(inIter)); //houni errue
+					}
+					else if((*inIter) == "XSEL"){
+            recognpointer_reloaded->setPointed(ExclusiveSelector::loadVect(inIter)); //houni errue
+					}
+					else if((*inIter) == "SEQ"){
+            recognpointer_reloaded->setPointed(Sequence::loadVect(inIter)); //houni errue
+					}
+					else if((*inIter) == "LOOP"){
+            recognpointer_reloaded->setPointed(Loop::loadVect(inIter)); //houni errue
+					}
+					else if((*inIter) == "XCR"){
+            recognpointer_reloaded->setPointed(CharRange::loadVect(inIter)); //houni errue
+					}
+					else if((*inIter) == "LIT"){
+            recognpointer_reloaded->setPointed(Literal::loadVect(inIter)); //houni errue
+					}
+					else if((*inIter) == "RECP"){
+            recognpointer_reloaded->setPointed(RecognizerPointer::loadVect(inIter)); //houni errue
+					}
+					else
+							std::cerr << "Undefined Recognizer type" << '\n';
+
+
+			}
+			else{
+				cerr << "no RECONGIZER PTR tag found" << endl;
+			}
 	return recognpointer_reloaded;
 }
 
@@ -1296,7 +1734,9 @@ void Grammar::saveRulesMap(ofstream &outFile){
 
 
 std::map<std::string,std::shared_ptr<Recognizer>> Grammar::loadRulesMap(ifstream &inFile){
-	long grammarLoadPosition = 0;
+
+
+  long grammarLoadPosition = 0;
 	string tempKey = "";
 	string tempTag = "";
 	shared_ptr<Recognizer> tempValue = NULL;
@@ -1338,8 +1778,108 @@ std::map<std::string,std::shared_ptr<Recognizer>> Grammar::loadRulesMap(ifstream
 
 	}
 
+template<typename Out>
+  void split(const std::string &s, char delim, Out result) {
+      std::stringstream ss;
+      ss.str(s);
+      std::string item;
+      while (std::getline(ss, item, delim)) {
+          *(result++) = item;
+      }
+  }
+
+
+  std::vector<std::string> split(const std::string &s, char delim) {
+      std::vector<std::string> elems;
+      split(s, delim, std::back_inserter(elems));
+      return elems;
+  }
+
+
+shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
+
+  string mNameLoaded = "";
+  string separator = "";
+  vector <string> fileStringRules; // vecteur contenant les regles de la grammaaire en format string
+
+//  long grammarLoadPosition = 0;
+  string tempKey = "";
+  string tempTag = "";
+  shared_ptr<Recognizer> tempValue = NULL;
+  std::map<std::string,std::shared_ptr<Recognizer>> mRulesLoaded;
+
+
+  ifstream inFile (fileName, ios::in | ios::binary);
+
+  if ( !inFile )
+    cout << "fichier inexistant";
+  else{
+//lecture du nom de la grammaire
+//  cout << "INSIDE THA MATRIX : no seg fault yet" << endl;
+
+    std::stringstream buffer; // variable contenant l'intégralité du fichier
+    buffer << inFile.rdbuf();
+    inFile.close();
+    string stringBuffer = buffer.str(); // string contenant l'integralité du fichier
+    std::vector<std::string> fileStringRules = split(stringBuffer, '\n'); // vecteur ou chaque ligne est une ligne du fichier
+  //  cout << "DEBUG : file :<" << stringBuffer << ">;" << endl;
+
+    vector<string>::const_iterator fileIter = fileStringRules.begin(); //iterateur
+//    cout << "file parsed and into the vector : no seg fault yet" << endl;
+    string line = (*fileIter);
+  //  cout << "DEBUG : first line :<" << line << ">;" << endl;
+    std::vector<std::string> result = split(line, ' ');
+    vector<string>::const_iterator it = result.begin();
+
+  //  cout << "DEBUG: first line parsed and into the vector : no seg fault yet" << endl;
+
+    mNameLoaded = *(it);
+    separator = *(++it);
+    while (separator != "==>") {
+      mNameLoaded += ( " " + separator);
+      separator = *(++it);
+    //  cout << "DEBUG : sepp" << separator << endl;
+    }
+
+//  cout << "DEBUG : file opened HAMDOULAH" << endl << "DEBUG : grammar name : <" << mNameLoaded << "> | <" << separator << ">"<<  endl;
+  ++fileIter;
+  //  bool continuer = true;
+//lecture des regles de la grammaire
+    while( (*fileIter) != "" )
+    {
+      //  cout << "DEBUG : line parsed : <" << *fileIter << ">;" <<  endl;
+        result = split(*fileIter, ' ');
+        it = result.begin();
+        tempKey = *it;
+        separator = *(++it);
+        while (separator != "=>") {
+          tempKey +=separator;
+          separator = *(++it);
+        }
+        tempTag = *(++it);
+        if(tempTag == "CR"){tempValue = CharRecognizer::loadVect(it);}
+  			if(tempTag == "SEL"){tempValue = Selector::loadVect(it);}
+  			if(tempTag == "XSEL"){tempValue = ExclusiveSelector::loadVect(it);}
+  			if(tempTag == "XCR"){tempValue = CharRange::loadVect(it);}
+  			if(tempTag == "SEQ"){tempValue = Sequence::loadVect(it);}
+  			if(tempTag == "LOOP"){tempValue = Loop::loadVect(it);}
+  			if(tempTag == "LIT"){tempValue = Literal::loadVect(it);}
+  			if(tempTag == "RECP"){tempValue = RecognizerPointer::loadVect(it);}
+        mRulesLoaded[tempKey] = tempValue;
+        ++fileIter;
+    }
+  }
+  inFile.close();
+
+  shared_ptr<Grammar> retGram = make_shared<Grammar>(mNameLoaded);
+  retGram->mRules = mRulesLoaded;
+  return retGram;
+
+
+}
+
 void Grammar::createGrammarDump(string dumpFileName){
-	ofstream outFile (dumpFileName, ios::out | ios::app);
+	ofstream outFile (dumpFileName, ios::out | ios::app | ios::binary);
 	outFile << mName << " ==> "<<endl;
 	this->saveRulesMap(outFile);
 	outFile.close();
@@ -1349,13 +1889,14 @@ shared_ptr<Grammar> Grammar::createLoadedGrammar(string fileName){
 	//The created grammar has the name of the file containing its rules
 	string mNameLoaded = "";
 	string separator = "";
-	ifstream inFile (fileName, ios::in);
+	ifstream inFile (fileName, ios::in | ios::binary);
 	inFile >> mNameLoaded;
 	inFile >> separator;
 	while (separator != "==>") {
 		mNameLoaded += (" " +separator);
 		inFile >> separator;
 	}
+
 	std::map<std::string,std::shared_ptr<Recognizer>> mRulesLoaded = Grammar::loadRulesMap(inFile);
 	inFile.close();
 

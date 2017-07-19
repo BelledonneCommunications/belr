@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <iostream>
+#include <vector>
 
 
 #ifdef _MSC_VER
@@ -70,6 +71,11 @@ public:
 	void save(std::ofstream& fichier, long &savePos);
 	static std::shared_ptr<CharRecognizer> load(std::ifstream& fichier, long &loadPos);
 	bool equal(const std::shared_ptr<Recognizer> &CR);
+	static std::shared_ptr<CharRecognizer> loadString(std::string& inLine);
+	void saveString(std::ofstream& outFile, long &savePos);
+	static std::shared_ptr<CharRecognizer> loadStringed(std::string& inLine, long &loadPos);
+	static std::shared_ptr<CharRecognizer> loadVect(std::vector<std::string>::const_iterator &inIter);
+
 
 	//DEBUG FUNCTION
 	void printtype();
@@ -90,6 +96,11 @@ public:
 	bool equal(const std::shared_ptr<Recognizer> &SEL);
 	//DEBUG FUNCTION
 	void printtype();
+	void saveString(std::ofstream& outFile, long &savePos);
+	static std::shared_ptr<Selector> loadString(std::string& inLine);
+	static std::shared_ptr<Selector> loadVect(std::vector<std::string>::const_iterator &inIter);
+
+
 
 protected:
 	virtual void _optimize(int recursionLevel);
@@ -106,6 +117,8 @@ public:
 	ExclusiveSelector();
 	void save(std::ofstream& fichier, long &savePos);
 	static std::shared_ptr<ExclusiveSelector> load(std::ifstream& fichier, long &loadPos);
+	static std::shared_ptr<ExclusiveSelector> loadVect(std::vector<std::string>::const_iterator &inIter);
+
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
 	//DEBUG FUNCTION
 	void printtype();
@@ -122,6 +135,8 @@ public:
 	virtual bool _getTransitionMap(TransitionMap *mask);
 	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
 	static std::shared_ptr<Sequence> load(std::ifstream& fichier, long &loadPos); //MODIFIE PAR IYED
+	static std::shared_ptr<Sequence> loadVect(std::vector<std::string>::const_iterator &inIter);
+
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
 	//DEBUG FUNCTION
 	void printtype();
@@ -144,6 +159,8 @@ public:
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
 	//DEBUG FUNCTION
 	void printtype();
+	static std::shared_ptr<Loop> loadVect(std::vector<std::string>::const_iterator &inIter);
+
 
 
 protected:
@@ -172,6 +189,8 @@ public:
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
 	//DEBUG FUNCTION
 	void printtype();
+	static std::shared_ptr<CharRange> loadVect(std::vector<std::string>::const_iterator &inIter);
+
 
 
 private:
@@ -189,6 +208,7 @@ public:
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
 	//DEBUG FUNCTION
 	void printtype();
+	static std::shared_ptr<Literal> loadVect(std::vector<std::string>::const_iterator &inIter);
 
 
 private:
@@ -214,6 +234,7 @@ public:
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
 	//DEBUG FUNCTION
 	void printtype();
+	static std::shared_ptr<RecognizerPointer> loadVect(std::vector<std::string>::const_iterator &inIter);
 
 private:
 	virtual void _optimize(int recursionLevel);
@@ -300,6 +321,8 @@ public:
 //Load functions
 	static std::shared_ptr<Grammar> createLoadedGrammar(std::string fileName);
 	static std::map<std::string,std::shared_ptr<Recognizer>> loadRulesMap(std::ifstream &inFile);
+	static std::shared_ptr<Grammar> loadVectRulesMap(std::string fileName);
+
 //comare functions
 	bool equal(std::shared_ptr<Grammar> &gramCompared);
 //debug functions

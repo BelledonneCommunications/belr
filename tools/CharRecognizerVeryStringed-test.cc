@@ -10,6 +10,9 @@
 #include <cstdlib>
 #include <memory>
 //#include <chrono>
+#include <fstream>
+#include <boost/tokenizer.hpp>
+#include <string>
 
 
 using namespace belr;
@@ -39,19 +42,17 @@ int main(int argc, char *argv[]){
 //SAVE AND LOAD
 	ofstream ofichier ("test-char.bin", ios::out | ios::app | ios::binary);
   character->save(ofichier, savePosition);
+  character2->save(ofichier, savePosition);
 	ofichier.close();
+
+
 
 	ifstream ifichier ("test-char.bin", ios::in | ios::binary);
-	const shared_ptr<CharRecognizer> characterLoaded = CharRecognizer::load(ifichier, loadPosition);
-	ifichier.close();
-
-	ofichier = ofstream("test-char.bin", ios::out | ios::app | ios::binary);
-
-	character2->save(ofichier, savePosition);
-	ofichier.close();
-
-	ifichier = ifstream("test-char.bin", ios::in | ios::binary);
-	const shared_ptr<CharRecognizer> characterLoaded2 = CharRecognizer::load(ifichier, loadPosition);
+  string contenu;  // déclaration d'une chaîne qui contiendra la ligne lue
+  getline(ifichier, contenu);  // on met dans "contenu" la ligne
+  cout << "DEBUG : Parsed string" << contenu << endl;
+  const shared_ptr<CharRecognizer> characterLoaded = CharRecognizer::loadStringed(contenu,loadPosition);
+	const shared_ptr<CharRecognizer> characterLoaded2 = CharRecognizer::loadStringed(contenu,loadPosition);
 	ifichier.close();
 
 	cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;

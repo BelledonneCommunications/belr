@@ -6,7 +6,7 @@
 #include <chrono>
 #include <ctime>
 #include <cstring>
-#include <chrono>
+
 
 #include "belr/parser-impl.cc" //this file is to be included only in the file where the parser is instanciated, for template instanciation.
 
@@ -26,32 +26,42 @@ int main(int argc, char *argv[]){
 
   ABNFGrammarBuilder builder;
 
-//Read grammar put it in object grammar
+  //Read grammar put it in object grammar
   auto start = std::chrono::high_resolution_clock::now();
   shared_ptr<Grammar> grammar=builder.createFromAbnfFile(grammarToParse, make_shared<CoreRules>());
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsedFirst = finish - start;
 
-
-if (!grammar){
+  cout << "DEBUG : grammar parsed no seg fault yet" << endl;
+  if (!grammar){
   cerr<<"Could not build grammar from basicgrammar.txt"<<endl;
   return -1;
-}
-  cout << "DEBUG : no seg fault yet" << endl;
-  if(remove("grammarDump.txt")){cerr << "Problem removing previous dump" << endl;}
-  grammar->createGrammarDump("grammarDump.txt");
+  }
 
-  cout << "DEBUG : no seg fault yet" << endl;
+  if(remove("grammarDump.bin")){cerr << "Problem removing previous dump" << endl;}
+  //Save grammar
+  grammar->createGrammarDump("grammarDump.bin");
+
+  cout << "DEBUG : grammar dump created no seg fault yet" << endl;
+
   //Load grammar
   start = std::chrono::high_resolution_clock::now();
-  shared_ptr<Grammar> loadedGram = Grammar::createLoadedGrammar("grammarDump.txt");
+  shared_ptr<Grammar> loadedGram = Grammar::loadVectRulesMap("grammarDump.bin");
   finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsedSecond = finish - start;
 
+  cout << "DEBUG : grammar dump loaded no seg fault yet" << endl;
+
+  //Verification and output of the results (Match , indvidual parsing time and optimisation ratio)
   bool isItOk = false;
   isItOk = grammar->equal(loadedGram);
-  cout << "Grammars loaded ,compare result : " << isItOk << endl;
+  string isItAMatch = isItOk ? "MATCH" : "NO MATCH";
+  cout << "Grammars loaded ,compare result : " << isItAMatch << endl;
   cout << "Elapsed time for initial parsing :" << elapsedFirst.count() << " VS second parsing :" << elapsedSecond.count() << endl;
-}
+  cout << "Optimisation ratio : " << (elapsedFirst.count() / elapsedSecond.count())*100 << "%"<< endl;
+//  cout << "*********************ORIGINAL GRAMMAR BUMP******************" << endl;
+//  grammar->debugGrammar();
+//  cout << "*********************LOADED GRAMMAR BUMP******************" << endl;
+//  loadedGram->debugGrammar();
 
-//
+}
