@@ -1,5 +1,3 @@
-
-
 #include "belr/belr.hh"
 #include "belr/parser.hh"
 #include <algorithm>
@@ -14,13 +12,6 @@
 
 using namespace std;
 using namespace belr;
-
-std::string parseStr(std::string s, long &strlPos){
-  size_t pos = s.find(" ",strlPos);
-  std::string ns = s.substr(strlPos, pos-strlPos);
-  strlPos  = pos+1;
-	return ns;
-}
 
 
 
@@ -178,43 +169,6 @@ void CharRecognizer::saveString(std::ofstream& outFile, long &savePos){
 		}
 }
 
-/**
-    Loads Char regognizer attributes from a file
-
-    @param std::string String containing the recognizer's description.
-    @return shared_ptr<CharRecognizer>
-*/
-shared_ptr<CharRecognizer> CharRecognizer::loadString(std::string& inLine){
-
-	if(!inLine.empty()){
-
-		typedef boost::tokenizer<boost::char_separator<char>>tokenizer;
-		boost::char_separator<char> sep(" ");
-
-		tokenizer tokens(inLine, sep);
-//		for (tokenizer::iterator tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter)
-//			std::cout <<"DEBUG: parsed element"<<  "<" << *tok_iter << "> ";
-		tokenizer::iterator tok_iter = tokens.begin();
-			cout << endl;
-		if (*(tok_iter) == "CR"){
-			string temp = *(++tok_iter);
-			bool mCaseSensitive_loaded = stoi(temp);
-		 	temp = *(++tok_iter);
-			int mToRecognize_loaded = stoi(temp);
-
-
-
-			return make_shared<CharRecognizer>(mToRecognize_loaded , mCaseSensitive_loaded);
-		}
-		else
-			cerr << "ERROR reading file : no CHAR RECOGNIZER tag found" << endl;
-
-	}
-	else
-		cerr << "ERROR reading file : lecture du String impossible" << endl;
-		return NULL;
-
-}
 
 /**
     Loads Char regognizer attributes from a file
@@ -242,37 +196,6 @@ shared_ptr<CharRecognizer> CharRecognizer::load(std::ifstream& inFile, long &loa
 		}
 	else{
 		cerr << "ERROR reading file : lecture du fichier impossible" << endl;
-	}
-	return NULL;
-}
-
-/**
-    Loads Char regognizer attributes from a file
-
-    @param std::string out stream of the file.
-    @return shared_ptr<CharRecognizer>
-*/
-shared_ptr<CharRecognizer> CharRecognizer::loadStringed(std::string& inLine, long &loadPos){
-
-	if(!inLine.empty()){
-
-		std::string tag = parseStr(inLine, loadPos); //parses the first element of the space separated string starting from strlPos
-//		cout << "DEBUG : tag CR :" << tag << " | ";
-			if (tag == "CR"){
-				string temp = parseStr(inLine, loadPos);
-		//		cout << "content : <" << temp <<">,<";
-				bool mCaseSensitive_loaded  = stoi(temp);
-				temp = parseStr(inLine, loadPos);
-	//			cout << temp << ">"<< endl;
-				int mToRecognize_loaded = stoi(temp);
-				return make_shared<CharRecognizer>(mToRecognize_loaded, mCaseSensitive_loaded);
-			}
-			else{
-				cerr << "ERROR no CHAR RECOGNIZER tag found" << endl;
-			}
-		}
-	else{
-		cerr << "ERROR loaded string is empty" << endl;
 	}
 	return NULL;
 }
@@ -934,13 +857,12 @@ shared_ptr<Sequence> Sequence::loadVect(std::vector<string>::const_iterator &inI
 	shared_ptr<Sequence> sequence_reloaded = NULL; //type de retour
 
 	if(*inIter == "SEQ"){
-		list<shared_ptr<Recognizer>> mElements_loaded;
 		int recognizerListSize = stoi(*(++inIter));
 	//	cout << " | NbElem : <" << *(inIter) << ">"<< endl;
 		sequence_reloaded = make_shared<Sequence>();
-		int i=0;
+	//	int i=0;
 		++inIter;
-		for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
+		for(int i=0; i<recognizerListSize; i++){
 			if (*(inIter) == "CR"){
 				sequence_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
 			}
@@ -967,8 +889,8 @@ shared_ptr<Sequence> Sequence::loadVect(std::vector<string>::const_iterator &inI
       }
       else
 							std::cerr << "ERROR : Type not recognized" << '\n';
-			i++;
-				}
+
+		}
 			}
 			else
 				cerr << "ERROR : No SELECTOR tag found" << endl;
@@ -1784,14 +1706,14 @@ template<typename Out>
       ss.str(s);
       std::string item;
       while (std::getline(ss, item, delim)) {
-          *(result++) = item;
+          *(result++) = item; //seg fault from here ==12114== Conditional jump or move depends on uninitialised value(s)
       }
   }
 
 
   std::vector<std::string> split(const std::string &s, char delim) {
       std::vector<std::string> elems;
-      split(s, delim, std::back_inserter(elems));
+      split(s, delim, std::back_inserter(elems)); //seg fault from here ==12114== Conditional jump or move depends on uninitialised value(s)
       return elems;
   }
 
@@ -1843,12 +1765,13 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 
 //  cout << "DEBUG : file opened HAMDOULAH" << endl << "DEBUG : grammar name : <" << mNameLoaded << "> | <" << separator << ">"<<  endl;
   ++fileIter;
-  //  bool continuer = true;
 //lecture des regles de la grammaire
-    while( (*fileIter) != "" )
+    while( fileIter !=  fileStringRules.end() )
     {
-      //  cout << "DEBUG : line parsed : <" << *fileIter << ">;" <<  endl;
-        result = split(*fileIter, ' ');
+        line =  (*fileIter);
+        line.erase(line.size()-1,1);
+    //    cout << "DEBUG : line parsed : <" << line << ">;" <<  endl;
+        result = split(line, ' ');
         it = result.begin();
         tempKey = *it;
         separator = *(++it);
