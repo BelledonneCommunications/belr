@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <boost/tokenizer.hpp>
 #include <string>
 #include <vector>
 #include <stdio.h>
