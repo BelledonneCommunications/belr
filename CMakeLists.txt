@@ -29,6 +29,7 @@ option(ENABLE_SHARED "Build shared library." ON)
 option(ENABLE_STATIC "Build static library." ON)
 option(ENABLE_STRICT "Build with strict compile options." YES)
 option(ENABLE_TOOLS "Turn on or off compilation of tools." YES)
+option(ENABLE_UNIT_TESTS "Enable compilation of unit tests." YES)
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -49,8 +50,10 @@ if(LINPHONE_BUILDER_GROUP_EXTERNAL_SOURCE_PATH_BUILDERS)
 	set(BcToolbox_FIND_COMPONENTS tester)
 	include("${EP_bctoolbox_CONFIG_DIR}/BcToolboxConfig.cmake")
 else()
-	find_package(BcToolbox 0.0.3 REQUIRED)
+	find_package(BcToolbox 0.0.3 REQUIRED OPTIONAL_COMPONENTS tester)# ligne a verifier
 endif()
+
+
 
 if(UNIX AND NOT APPLE)
 	include(CheckIncludeFiles)
@@ -114,6 +117,9 @@ endif()
 
 add_subdirectory(include)
 add_subdirectory(src)
+if(ENABLE_UNIT_TESTS AND BCTOOLBOX_TESTER_FOUND)
+	add_subdirectory(tester)
+endif()
 if(ENABLE_TOOLS)
 	add_subdirectory(tools)
 endif()

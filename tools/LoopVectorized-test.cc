@@ -187,6 +187,7 @@ int main(int argc, char *argv[]){
     else cout << "FAILED : Sequence Loop feed gone wrong" << endl;
     if (loopLiteralLoaded->feed(NULL, "abcd", 0) == 4)cout << "SUCESS : Literal Loop feed successfull" << endl;
     else cout << "FAILED : Literal Loop feed gone wrong" << endl;
+    cout << loopRecPointerLoaded->feed(NULL, "a", 0) << endl;
     if (loopRecPointerLoaded->feed(NULL, "a", 0) == 1)cout << "SUCESS : RecognizerPointer Loop feed successfull" << endl;
     else cout << "FAILED : RecognizerPointer Loop feed gone wrong" << endl;
 
