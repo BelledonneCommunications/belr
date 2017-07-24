@@ -21,33 +21,49 @@
 ############################################################################
 
 if(ENABLE_SHARED)
-	set(BELR_LIBRARIES_FOR_TOOLS belr)
+	set(BELR_LIBRARIES_FOR_TESTER belr)
 else()
-	set(BELR_LIBRARIES_FOR_TOOLS belr-static)
+	set(BELR_LIBRARIES_FOR_TESTER belr-static)
 endif()
 
-foreach(EXECTUABLE belr-parse CharRecognizerVectorized-test SelectorVectorized-test SequenceVectorized-test ExclusiveSelectorVectorized-test LoopVectorized-test CharRangeVectorized-test RecognizerPointerVectorized-test LiteralVectorized-test GrammarDump-test exploreGrammar)
-	set(SOURCE_FILES_CXX ${EXECTUABLE}.cc)
-	bc_apply_compile_flags(SOURCE_FILES_CXX STRICT_OPTIONS_CPP STRICT_OPTIONS_CXX)
-	add_executable(${EXECTUABLE} ${SOURCE_FILES_CXX})
-	set_target_properties(${EXECTUABLE} PROPERTIES LINKER_LANGUAGE CXX)
-	target_link_libraries(${EXECTUABLE} ${BELR_LIBRARIES_FOR_TOOLS} ${BCTOOLBOX_CORE_LIBRARIES})
-	if(APPLE)
-		set_target_properties(${EXECTUABLE} PROPERTIES LINK_FLAGS "-stdlib=libc++")
-	endif()
+set(GRAMMAR_FILES
+#LES GRAMMAIRES A INSERER ICI
+#	grammars/.....
+)
 
-endforeach()
+set(HEADER_FILES_CXX belr-tester.hpp)
+set(SOURCE_FILES_CXX
+#LES TESTEURS UNITAIRES ICI
+	belr-tester.cpp
+	belr-charrecognizer-tester.cpp
+	belr-selector-tester.cpp
+	belr-exclusiveselector-tester.cpp
+	belr-sequence-tester.cpp
+	belr-loop-tester.cpp
+	belr-charrange-tester.cpp
+	belr-literal-tester.cpp
+	belr-recognizerpointer-tester.cpp
+	belr-basicgrammar-tester.cpp
+	belr-vcardgrammar-tester.cpp
+
+)
+
+bc_apply_compile_flags(SOURCE_FILES_CXX STRICT_OPTIONS_CPP STRICT_OPTIONS_CXX)
+
+add_executable(belr_tester ${SOURCE_FILES_CXX} ${HEADER_FILES_CXX})
+set_target_properties(belr_tester PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(belr_tester PUBLIC ${BCTOOLBOX_TESTER_INCLUDE_DIRS})
+target_link_libraries(belr_tester ${BELR_LIBRARIES_FOR_TESTER} ${BCTOOLBOX_TESTER_LIBRARIES})
+
+if(APPLE)
+	set_target_properties(belr_tester PROPERTIES LINK_FLAGS "-stdlib=libc++")
+endif()
 if(NOT IOS)
-	install(TARGETS belr-parse
+	install(TARGETS belr_tester
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 	)
 endif()
-
-add_custom_command(
-        TARGET GrammarDump-test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/tools/grammars/*.txt
-                ${CMAKE_CURRENT_BINARY_DIR}/grammars/)
+install(FILES ${GRAMMAR_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/belr_tester/grammars")

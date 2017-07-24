@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
   vector<string>::const_iterator i = result.begin();
 
 
-  cout << "DEBUG : Parsed string" << contenu << endl;
+  
   const shared_ptr<CharRecognizer> characterLoaded = CharRecognizer::loadVect(i);
 	const shared_ptr<CharRecognizer> characterLoaded2 = CharRecognizer::loadVect(i);
 	ifichier.close();

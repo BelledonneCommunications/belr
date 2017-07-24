@@ -135,8 +135,10 @@ void CharRecognizer::_optimize(int recursionLevel){
 		write format is : TAG mCaseSensitive mToRecognize
 		TAG is "CR"
     @param std:: ofstream out stream of the file.
+					long : save position inside the file
     @return void
 */
+
 void CharRecognizer::save(std::ofstream& outFile, long &savePos){
 	outFile.seekp(savePos, ios::beg);
 
@@ -150,67 +152,17 @@ void CharRecognizer::save(std::ofstream& outFile, long &savePos){
 }
 
 /**
-    Saves Char regognizer attributes in a file
-		write format is : TAG SPACE mCaseSensitive : mToRecognize |
-		TAG is "CR"
-    @param std:: ofstream out stream of the file.
-    @return void
-*/
-void CharRecognizer::saveString(std::ofstream& outFile, long &savePos){
-	outFile.seekp(savePos, ios::beg);
+    Creates a CharRecognizer from parsed data
 
-		if(outFile){
-			outFile << "CR" << " " << mCaseSensitive  << ":" <<	mToRecognize << "|";
-			savePos = outFile.tellp();
-		}
-		else{
-			cerr << "ERROR writing to file : output stream unavailable" << endl;
-		}
-}
-
-
-/**
-    Loads Char regognizer attributes from a file
-
-    @param std::ifstream out stream of the file.
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
     @return shared_ptr<CharRecognizer>
 */
-shared_ptr<CharRecognizer> CharRecognizer::load(std::ifstream& inFile, long &loadPos){
-	inFile.seekg(loadPos, ios::beg);
-
-	if(inFile){
-		bool mCaseSensitive_loaded = false;
-		int mToRecognize_loaded = 0;
-		std::string tag = "";
-		inFile >> tag ;
-
-			if (tag == "CR"){
-				inFile >> mCaseSensitive_loaded >> mToRecognize_loaded;
-				loadPos = inFile.tellg();
-			}
-			else{
-				cerr << "ERROR reading file : no CHAR RECOGNIZER tag found" << endl;
-			}
-			return make_shared<CharRecognizer>(mToRecognize_loaded, mCaseSensitive_loaded);
-		}
-	else{
-		cerr << "ERROR reading file : lecture du fichier impossible" << endl;
-	}
-	return NULL;
-}
-
-
 shared_ptr<CharRecognizer> CharRecognizer::loadVect(std::vector<string>::const_iterator &inIter){
-	//cout << "DEBUG : tag : <" << *(inIter) << ">";
+
 	if (*(inIter) == "CR"){
-		string temp = *(++inIter);
-	//	cout << " | caseSens : <" << *(inIter) << "> | ";
-
-		bool mCaseSensitive_loaded = stoi(temp);
-	 	temp = *(++inIter);
-	//	cout << "Caracter : <" << *(inIter) << ">"<< endl;
-
-		int mToRecognize_loaded = stoi(temp);
+		bool mCaseSensitive_loaded = stoi(*(++inIter));
+		int mToRecognize_loaded = stoi(*(++inIter));
 		++inIter;
 		return make_shared<CharRecognizer>(mToRecognize_loaded , mCaseSensitive_loaded);
 	}
@@ -218,12 +170,6 @@ shared_ptr<CharRecognizer> CharRecognizer::loadVect(std::vector<string>::const_i
 		cerr << "ERROR reading file : no CHAR RECOGNIZER tag found" << endl;
 	return NULL;
 }
-
-
-
-
-
-
 
 bool CharRecognizer::equal(const shared_ptr<Recognizer> &CR){
 	//Using dynamic cast to have acces to the attributes of the CharRecognizer object
@@ -315,45 +261,11 @@ void Selector::_optimize(int recursionLevel){
 }
 /**
     Saves Selector attributes in a file
-		write format is : TAG mIsExclusive numberOfElements :: Element1 Element2 Element3
-		each Element is a recognizer meaning it has got its own format
-		TAG is "SEL"
-    @param std:: ofstream out stream of the file.
-    @return void
-*/
-void Selector::saveString(std::ofstream& outFile, long &savePos){
-	outFile.seekp(savePos, ios::beg);
-
-		if(outFile){
-			outFile << "SEL" << " " << mIsExclusive  << " ";
-			savePos = outFile.tellp();
-			int recognizerListSize = 0;
-
-			//the number of elements in the recognizer list is needed when loading the Selector afterwards
-			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
-				recognizerListSize++ ;
-			}
-
-
-			outFile << recognizerListSize << ":";
-
-			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
-						(*it)->save(outFile, savePos);
-
- 			}
-		}
-		else{
-			cerr << "ecriture dans le fichier impossibe" << endl;
-		}
-}
-
-
-/**
-    Saves Selector attributes in a file
 		write format is : TAG mIsExclusive numberOfElements Element1 Element2 Element3
 		each Element is a recognizer meaning it has got its own format
 		TAG is "SEL"
     @param std:: ofstream out stream of the file.
+		long : save position inside the file
     @return void
 */
 void Selector::save(std::ofstream& outFile, long &savePos){
@@ -363,15 +275,11 @@ void Selector::save(std::ofstream& outFile, long &savePos){
 			outFile << "SEL" << " " << mIsExclusive  << " ";
 			savePos = outFile.tellp();
 			int recognizerListSize = 0;
-
 			//the number of elements in the recognizer list is needed when loading the Selector afterwards
 			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
 				recognizerListSize++ ;
 			}
-
-
 			outFile << recognizerListSize << " ";
-
 			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
 						(*it)->save(outFile, savePos);
 
@@ -382,140 +290,35 @@ void Selector::save(std::ofstream& outFile, long &savePos){
 		}
 }
 
-shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inIter){
-//	cout << "DEBUG : tag : <" << *(inIter) << ">";
-
-	shared_ptr<Selector> selector_reloaded = NULL;
-
-	if(*inIter == "SEL"){
-		list<shared_ptr<Recognizer>> mElements_loaded;
-		bool mIsExclusive_loaded = stoi(*(++inIter));
-//		cout << " | IsEx : <" << *(inIter) << "> | ";
-		int recognizerListSize = stoi(*(++inIter));
-//		cout << "NbElem : <" << *(inIter) << ">"<< endl;
-		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
-		int i=0;
-		++inIter;
-
-		for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
-      if (*(inIter) == "CR"){
-				selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
-			}
-      else if(*(inIter) == "SEQ"){
-      	selector_reloaded->addRecognizer(Sequence::loadVect(inIter));
-      }
-      else if(*(inIter) == "LOOP"){
-        selector_reloaded->addRecognizer(Loop::loadVect(inIter));
-      }
-      else if(*(inIter) == "XCR"){
-        selector_reloaded->addRecognizer(CharRange::loadVect(inIter));
-      }
-      else if(*(inIter) == "LIT"){
-        selector_reloaded->addRecognizer(Literal::loadVect(inIter));
-      }
-      else if(*(inIter) == "XSEL"){
-      	selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
-      }
-      else if(*(inIter) == "SEL"){
-      	selector_reloaded->addRecognizer(Selector::loadVect(inIter));
-      }
-      else if(*(inIter) == "RECP"){
-        selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
-      }
-      else
-							std::cerr << "ERROR : inside selector Type not recognized" << '\n';
-			i++;
-				}
-			}
-			else
-				cerr << "ERROR : No SELECTOR tag found" << endl;
-
-	return selector_reloaded;
-
-}
 /**
-    Loads Selector attributes from a file
+    Creates a Selector from parsed data
 
-    @param std::ifstream out stream of the file.
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
     @return shared_ptr<Selector>
 */
-shared_ptr<Selector> Selector::load(std::ifstream& inFile, long &loadPos){
-
-	inFile.seekg(loadPos, ios::beg);
-
+shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inIter){
 	shared_ptr<Selector> selector_reloaded = NULL;
-	shared_ptr<Recognizer> temp;
+	if(*inIter == "SEL"){
+		bool mIsExclusive_loaded = stoi(*(++inIter));
+		int recognizerListSize = stoi(*(++inIter));
+		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
+		++inIter;
 
-	if(inFile){
-
-		bool mIsExclusive_loaded ;
-		list<shared_ptr<Recognizer>> mElements_loaded;
-
-		int recognizerListSize =0;
-		std::string tag = "";
-		inFile >> tag ;
-
-			if (tag == "SEL"){
-				inFile >> mIsExclusive_loaded;
-				inFile >> recognizerListSize;
-				loadPos = inFile.tellg();
-
-				selector_reloaded = Foundation::selector(mIsExclusive_loaded);
-
-				int i = 0;
-				for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
-
-					inFile.seekg(loadPos, ios::beg);
-
-					long pos_pre_tag = inFile.tellg();
-					inFile >> tag;
-
-					if (tag == "CR"){
-							inFile.seekg(pos_pre_tag, ios::beg);
-							selector_reloaded->addRecognizer(CharRecognizer::load(inFile, loadPos));
-					}
-					else if(tag == "SEQ"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(Sequence::load(inFile, loadPos));
-					}
-					else if(tag == "LOOP"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(Loop::load(inFile, loadPos));
-					}
-					else if(tag == "XCR"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(CharRange::load(inFile, loadPos));
-					}
-					else if(tag == "LIT"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(Literal::load(inFile, loadPos));
-					}
-					else if(tag == "XSEL"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(ExclusiveSelector::load(inFile, loadPos));
-					}
-					else if(tag == "SEL"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(Selector::load(inFile, loadPos));
-					}
-					else if(tag == "RECP"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						selector_reloaded->addRecognizer(RecognizerPointer::load(inFile, loadPos));
-					}
-					else
-							std::cerr << "ERROR : Type not recognized" << '\n';
-					i++;
-
-				}
-
-			}
-			else{
-				cerr << "ERROR : No SELECTOR tag found" << endl;
-			}
+		for(int i=0; i<recognizerListSize; i++){
+      if (*(inIter) == "CR") selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
+      else if(*(inIter) == "SEQ") selector_reloaded->addRecognizer(Sequence::loadVect(inIter));
+      else if(*(inIter) == "LOOP") selector_reloaded->addRecognizer(Loop::loadVect(inIter));
+      else if(*(inIter) == "XCR") selector_reloaded->addRecognizer(CharRange::loadVect(inIter));
+      else if(*(inIter) == "LIT") selector_reloaded->addRecognizer(Literal::loadVect(inIter));
+      else if(*(inIter) == "XSEL")selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
+      else if(*(inIter) == "SEL") selector_reloaded->addRecognizer(Selector::loadVect(inIter));
+      else if(*(inIter) == "RECP") selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
+      else std::cerr << "ERROR : inside selector Type not recognized" << '\n';
+		}
 	}
-	else{
-		cerr << "ERROR : file stream unavailable" << endl;
-	}
+	else
+		cerr << "ERROR : No SELECTOR tag found" << endl;
 	return selector_reloaded;
 }
 
@@ -557,24 +360,25 @@ size_t ExclusiveSelector::_feed(const shared_ptr<ParserContextBase> &ctx, const 
 	return Selector::_feedExclusive(ctx, input, pos);
 }
 
+/**
+    Saves ExclusiveSelector attributes in a file
+		write format is : TAG mIsExclusive exRecognizerListSize Element1 Element2 ...
+		TAG is "XSEL"
+    @param std:: ofstream out stream of the file.
+					long : save position inside the file
+    @return void
+*/
 void ExclusiveSelector::save(std::ofstream& outFile, long &savePos){
 		outFile.seekp(savePos, ios::beg);
 		if(outFile){
 			outFile << "XSEL" << " " << mIsExclusive  << " ";
-
 			int exRecognizerListSize = 0;
-
 			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
 				exRecognizerListSize++ ;
 			}
-
 			outFile << exRecognizerListSize << " ";
-			int i =0;
-			savePos = outFile.tellp(); // récuppération de la dernière position d'écriture et affectation dans savePos
-
-			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); i<exRecognizerListSize ; ++it){
+			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
 					(*it)->save(outFile, savePos);
-					i++;
  			}
 		}
 		else{
@@ -583,118 +387,37 @@ void ExclusiveSelector::save(std::ofstream& outFile, long &savePos){
 }
 
 
-shared_ptr<ExclusiveSelector> ExclusiveSelector::load(std::ifstream& inFile, long &loadPos){
+/**
+    Creates an ExclusiveSelector from parsed data
 
-	inFile.seekg(loadPos, ios::beg);
-
-	shared_ptr<Selector> selector_reloaded = NULL;
-
-	if(inFile){
-
-		bool mIsExclusive_loaded ;
-		list<shared_ptr<Recognizer>> mElements_loaded;
-
-		int exRecognizerListSize =0;
-		std::string tag = "";
-		inFile >> tag ;
-			if (tag == "XSEL"){
-				inFile >> mIsExclusive_loaded;
-				inFile >> exRecognizerListSize;
-				loadPos = inFile.tellg();
-				selector_reloaded = Foundation::selector(mIsExclusive_loaded);
-				int i = 0;
-				for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<exRecognizerListSize; ++it){ // TODO AGAIN
-					inFile >> tag;
-					if (tag == "CR"){
-							selector_reloaded->addRecognizer(CharRecognizer::load(inFile, loadPos));
-					}
-					else if(tag == "SEQ"){
-						selector_reloaded->addRecognizer(Sequence::load(inFile, loadPos));
-					}
-					else if(tag == "LOOP"){
-						selector_reloaded->addRecognizer(Loop::load(inFile, loadPos));
-					}
-					else if(tag == "XCR"){
-						selector_reloaded->addRecognizer(CharRange::load(inFile, loadPos));
-					}
-					else if(tag == "LIT"){
-						selector_reloaded->addRecognizer(Literal::load(inFile, loadPos));
-					}
-					else if(tag == "SEL"){
-						selector_reloaded->addRecognizer(Selector::load(inFile, loadPos));
-					}
-					else if(tag == "RECP"){
-						selector_reloaded->addRecognizer(RecognizerPointer::load(inFile, loadPos));
-					}
-					else if(tag == "XSEL"){
-						selector_reloaded->addRecognizer(ExclusiveSelector::load(inFile, loadPos));
-					}
-					else
-							std::cerr << "ERROR : Type inside exclusive selector not recognized" << '\n';
-					i++;
-
-				}
-
-			}
-			else{
-				cerr << "ERROR : no EXCLUSIVESELECTOR tag found" << endl;
-			}
-	}
-	else{
-		cerr << "ERROR : file stream unavailable" << endl;
-	}
-	return dynamic_pointer_cast<ExclusiveSelector>(selector_reloaded);
-}
-
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
+    @return shared_ptr<ExclusiveSelector>
+*/
 shared_ptr<ExclusiveSelector> ExclusiveSelector::loadVect(std::vector<string>::const_iterator &inIter){
-//	cout << "DEBUG : tag : <" << *(inIter) << ">";
-
 	shared_ptr<Selector> selector_reloaded = NULL;
 
 	if(*inIter == "XSEL"){
-		list<shared_ptr<Recognizer>> mElements_loaded;
 		bool mIsExclusive_loaded = stoi(*(++inIter));
-//		cout << " | IsEx : <" << *(inIter) << "> | ";
 		int recognizerListSize = stoi(*(++inIter));
-	//	cout << "NbElem : <" << *(inIter) << ">"<< endl;
 		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
-		int i=0;
-		++inIter;
-		for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<recognizerListSize; ++it){
-	//		cout << "DEBUG : tag inside : <" << *inIter << ">" << endl;
-			if (*(inIter) == "CR"){
-				selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
-			}
-			else if(*(inIter) == "XSEL"){
-				selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
-			}
-			else if(*(inIter) == "SEL"){
-				selector_reloaded->addRecognizer(Selector::loadVect(inIter));
-			}
-			else if(*(inIter) == "SEQ"){
-      	selector_reloaded->addRecognizer(Sequence::loadVect(inIter));
-      }
-      else if(*(inIter) == "LOOP"){
-        selector_reloaded->addRecognizer(Loop::loadVect(inIter));
-      }
-      else if(*(inIter) == "XCR"){
-        selector_reloaded->addRecognizer(CharRange::loadVect(inIter));
-      }
-      else if(*(inIter) == "LIT"){
-        selector_reloaded->addRecognizer(Literal::loadVect(inIter));
-      }
-      else if(*(inIter) == "RECP"){
-      	selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
-      }
-      else
-							std::cerr << "ERROR : Type not recognized" << '\n';
-			i++;
-				}
-			}
-			else
-				cerr << "ERROR : No SELECTOR tag found" << endl;
 
-			return dynamic_pointer_cast<ExclusiveSelector>(selector_reloaded);
+		++inIter;
+		for(int i=0; i<recognizerListSize; i++){
+			if (*(inIter) == "CR") selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
+      else if(*(inIter) == "SEQ") selector_reloaded->addRecognizer(Sequence::loadVect(inIter));
+      else if(*(inIter) == "LOOP") selector_reloaded->addRecognizer(Loop::loadVect(inIter));
+      else if(*(inIter) == "XCR") selector_reloaded->addRecognizer(CharRange::loadVect(inIter));
+      else if(*(inIter) == "LIT") selector_reloaded->addRecognizer(Literal::loadVect(inIter));
+      else if(*(inIter) == "XSEL")selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
+      else if(*(inIter) == "SEL") selector_reloaded->addRecognizer(Selector::loadVect(inIter));
+      else if(*(inIter) == "RECP") selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
+      else std::cerr << "ERROR : inside selector Type not recognized" << '\n';
+		}
+	}
+	else
+		cerr << "ERROR : No SELECTOR tag found" << endl;
+	return dynamic_pointer_cast<ExclusiveSelector>(selector_reloaded);
 }
 
 
@@ -761,27 +484,26 @@ void Sequence::_optimize(int recursionLevel){
 	for (auto it=mElements.begin(); it!=mElements.end(); ++it)
 		(*it)->optimize(recursionLevel);
 }
-
+/**
+    Saves Sequence attributes in a file
+		write format is : TAG sequenceListSize Element1 Element2 ...
+		TAG is "SEQ"
+    @param std:: ofstream out stream of the file.
+					long : save position inside the file
+    @return void
+*/
 void Sequence::save(std::ofstream& outFile, long &savePos){
 
 		outFile.seekp(savePos, ios::beg);
 		if(outFile){
 			outFile << "SEQ" << " ";
-
 			int sequenceListSize = 0;
-
 			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
 				sequenceListSize++ ;
 			}
-
 			outFile << sequenceListSize << " ";
-			int i =0;
-			savePos = outFile.tellp(); // récuppération de la dernière position d'écriture et affectation dans savePos
-
-			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); i<sequenceListSize ; ++it){
-				shared_ptr<Recognizer> re = (shared_ptr<Recognizer>)*it;
-				re->save(outFile, savePos);
-				i++;
+			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
+				(*it)->save(outFile, savePos);
  			}
 		}
 		else{
@@ -789,112 +511,36 @@ void Sequence::save(std::ofstream& outFile, long &savePos){
 		}
 }
 
-shared_ptr<Sequence> Sequence::load(std::ifstream& inFile, long &loadPos){
-	inFile.seekg(loadPos, ios::beg);
+/**
+    Creates a Sequence from parsed data
 
-	shared_ptr<Sequence> sequence_reloaded = NULL; //type de retour
-	shared_ptr<Recognizer> temp;
-
-	if(inFile){
-		list<shared_ptr<Recognizer>> mElements_loaded;
-
-		int sequenceListSize =0;
-		std::string tag = "";
-		inFile >> tag ;
-
-			if (tag == "SEQ"){
-				inFile >> sequenceListSize;
-				loadPos = inFile.tellg();
-				sequence_reloaded = make_shared<Sequence>();
-
-				int i = 0;
-				for(list<shared_ptr<Recognizer>>::const_iterator it = mElements_loaded.begin(); i<sequenceListSize; ++it){ // TODO AGAIN
-
-					inFile >> tag;
-					if (tag == "CR"){
-							sequence_reloaded->addRecognizer(CharRecognizer::load(inFile, loadPos));
-					}
-					else if(tag == "SEL"){
-						sequence_reloaded->addRecognizer(Selector::load(inFile, loadPos));
-					}
-					else if(tag == "XSEL"){
-						sequence_reloaded->addRecognizer(ExclusiveSelector::load(inFile, loadPos));
-					}
-					else if(tag == "XCR"){
-						sequence_reloaded->addRecognizer(CharRange::load(inFile, loadPos));
-					}
-					else if(tag == "LIT"){
-						sequence_reloaded->addRecognizer(Literal::load(inFile, loadPos));
-					}
-					else if(tag == "LOOP"){
-						sequence_reloaded->addRecognizer(Loop::load(inFile, loadPos));
-					}
-					else if(tag == "RECP"){
-						sequence_reloaded->addRecognizer(RecognizerPointer::load(inFile, loadPos));
-					}
-					else if(tag == "SEQ"){
-						sequence_reloaded->addRecognizer(Sequence::load(inFile, loadPos));
-					}
-					else
-							std::cerr << "ERROR : TAG not recognized" << '\n';
-					i++;
-				}
-			}
-			else{
-				cerr << "ERROR : no SEQUENCE tag found" << endl;
-			}
-	}
-	else{
-		cerr << "ERROR : file stream unavailable" << endl;
-	}
-	return sequence_reloaded;
-}
-
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
+    @return shared_ptr<Sequence>
+*/
 shared_ptr<Sequence> Sequence::loadVect(std::vector<string>::const_iterator &inIter){
-	//cout << "DEBUG : tag : <" << *(inIter) << ">";
 
-	shared_ptr<Sequence> sequence_reloaded = NULL; //type de retour
+	shared_ptr<Sequence> sequence_reloaded = NULL;
 
 	if(*inIter == "SEQ"){
 		int recognizerListSize = stoi(*(++inIter));
-	//	cout << " | NbElem : <" << *(inIter) << ">"<< endl;
 		sequence_reloaded = make_shared<Sequence>();
-	//	int i=0;
 		++inIter;
 		for(int i=0; i<recognizerListSize; i++){
-			if (*(inIter) == "CR"){
-				sequence_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
-			}
-			else if(*(inIter) == "XSEL"){
-				sequence_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
-			}
-			else if(*(inIter) == "SEL"){
-				sequence_reloaded->addRecognizer(Selector::loadVect(inIter));
-			}
-			else if(*(inIter) == "SEQ"){
-      	sequence_reloaded->addRecognizer(Sequence::loadVect(inIter));
-      }
-      else if(*(inIter) == "LOOP"){
-        sequence_reloaded->addRecognizer(Loop::loadVect(inIter));
-      }
-      else if(*(inIter) == "XCR"){
-        sequence_reloaded->addRecognizer(CharRange::loadVect(inIter));
-      }
-      else if(*(inIter) == "LIT"){
-        sequence_reloaded->addRecognizer(Literal::loadVect(inIter));
-      }
-      else if(*(inIter) == "RECP"){
-      	sequence_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
-      }
-      else
-							std::cerr << "ERROR : Type not recognized" << '\n';
-
+			if (*(inIter) == "CR") sequence_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
+      else if(*(inIter) == "SEQ") sequence_reloaded->addRecognizer(Sequence::loadVect(inIter));
+      else if(*(inIter) == "LOOP") sequence_reloaded->addRecognizer(Loop::loadVect(inIter));
+      else if(*(inIter) == "XCR") sequence_reloaded->addRecognizer(CharRange::loadVect(inIter));
+      else if(*(inIter) == "LIT") sequence_reloaded->addRecognizer(Literal::loadVect(inIter));
+      else if(*(inIter) == "XSEL")sequence_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter));
+      else if(*(inIter) == "SEL") sequence_reloaded->addRecognizer(Selector::loadVect(inIter));
+      else if(*(inIter) == "RECP") sequence_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter));
+      else std::cerr << "ERROR : inside selector Type not recognized" << '\n';
 		}
-			}
-			else
-				cerr << "ERROR : No SELECTOR tag found" << endl;
-
-			return (sequence_reloaded);
+	}
+	else
+		cerr << "ERROR : No SELECTOR tag found" << endl;
+	return (sequence_reloaded);
 }
 
 
@@ -961,155 +607,53 @@ void Loop::_optimize(int recursionLevel){
 	mRecognizer->optimize(recursionLevel);
 }
 
-//MODIFIE PAR IYED
+/**
+    Saves Loop attributes in a file
+		write format is : TAG mMin mMax mRecognizer
+		TAG is "LOOP"
+    @param std:: ofstream out stream of the file.
+					long : save position inside the file
+    @return void
+*/
 void Loop::save(std::ofstream& outFile, long &savePos){
-
-		outFile.seekp(savePos, ios::beg);
-		if(outFile){
-			outFile << "LOOP" << " " << mMin << " " << mMax << " ";
-			mRecognizer->save(outFile, savePos);
-		}
-		else{
-			cerr << "ecriture dans le fichier impossibe" << endl;
-		}
-}
-
-shared_ptr<Loop> Loop::load(std::ifstream& inFile, long &loadPos){
-	inFile.seekg(loadPos, ios::beg);
-
-	shared_ptr<Loop> loop_reloaded = NULL; //type de retour
-
-	if(inFile){
-
-		int mMin_loaded;
-		int mMax_loaded;
-
-
-		std::string tag = "";
-		inFile >> tag ;
-
-
-			if (tag == "LOOP"){
-
-				inFile >> mMin_loaded >> mMax_loaded;
-				loadPos = inFile.tellg();
-				//	long pos_pre_tag = inFile.tellg();
-					inFile >> tag;
-
-					if (tag == "CR"){
-
-				//			inFile.seekg(pos_pre_tag, ios::beg);
-							const shared_ptr<CharRecognizer> mRecognizer_loaded = CharRecognizer::load(inFile, loadPos);
-							loop_reloaded = make_shared<Loop>();
-							loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded); //houni errue
-
-					}
-					else if(tag == "SEL"){
-
-			//			inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Selector> mRecognizer_loaded = (Selector::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else if(tag == "XSEL"){
-				//		inFile.seekg(pos_pre_tag, ios::beg);
-
-						const shared_ptr<ExclusiveSelector> mRecognizer_loaded = (ExclusiveSelector::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else if(tag == "SEQ"){
-					//	inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Sequence> mRecognizer_loaded = (Sequence::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else if(tag == "XCR"){
-				//		inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<CharRange> mRecognizer_loaded = (CharRange::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else if(tag == "LIT"){
-			//			inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Literal> mRecognizer_loaded = (Literal::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else if(tag == "RECP"){
-			//			inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<RecognizerPointer> mRecognizer_loaded = (RecognizerPointer::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else if(tag == "LOOP"){
-			//			inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Loop> mRecognizer_loaded = (Loop::load(inFile, loadPos));
-						loop_reloaded = make_shared<Loop>();
-						loop_reloaded->setRecognizer(mRecognizer_loaded, mMin_loaded, mMax_loaded);
-					}
-					else
-							std::cerr << "Recognizer type undefined" << '\n';
-
-
-
-			}
-			else{
-				cerr << "no LOOP tag found" << endl;
-			}
+	outFile.seekp(savePos, ios::beg);
+	if(outFile){
+		outFile << "LOOP" << " " << mMin << " " << mMax << " ";
+		mRecognizer->save(outFile, savePos);
 	}
 	else{
-		cerr << "lecture du fichier impossible" << endl;
+		cerr << "ecriture dans le fichier impossibe" << endl;
 	}
-
-	return loop_reloaded;
 }
 
-shared_ptr<Loop> Loop::loadVect(std::vector<string>::const_iterator &inIter){
-//	cout << "DEBUG : tag : <" << *(inIter) << ">";
+/**
+    Creates a Loop from parsed data
 
-	shared_ptr<Loop> loop_reloaded = NULL; //type de retour
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
+    @return shared_ptr<Loop>
+*/
+shared_ptr<Loop> Loop::loadVect(std::vector<string>::const_iterator &inIter){
+
+	shared_ptr<Loop> loop_reloaded = NULL;
 
 	if(*inIter == "LOOP"){
-//		list<shared_ptr<Recognizer>> mElements_loaded;
     int mMin_loaded =  stoi(*(++inIter));
-//    cout << " | mMin : <" << *(inIter) << ">"<< endl;
-
     int mMax_loaded =  stoi(*(++inIter));
-
-	//	cout << " | mMax : <" << *(inIter) << ">"<< endl;
     loop_reloaded = make_shared<Loop>();
 		++inIter;
-			if (*(inIter) == "CR"){
-        loop_reloaded->setRecognizer(CharRecognizer::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-			}
-			else if(*(inIter) == "XSEL"){
-        loop_reloaded->setRecognizer(ExclusiveSelector::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-			}
-			else if(*(inIter) == "SEL"){
-        loop_reloaded->setRecognizer(Selector::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-			}
-			else if(*(inIter) == "SEQ"){
-        loop_reloaded->setRecognizer(Sequence::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-      }
-      else if(*(inIter) == "LOOP"){
-        loop_reloaded->setRecognizer(Loop::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-      }
-      else if(*(inIter) == "XCR"){
-        loop_reloaded->setRecognizer(CharRange::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-      }
-      else if(*(inIter) == "LIT"){
-        loop_reloaded->setRecognizer(Literal::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-      }
-      else if(*(inIter) == "RECP"){
-        loop_reloaded->setRecognizer(RecognizerPointer::loadVect(inIter), mMin_loaded, mMax_loaded); //houni errue
-      }
-      else
-				std::cerr << "ERROR : Type not recognized" << '\n';
-		}
-		else
-			cerr << "ERROR : No SELECTOR tag found" << endl;
-
+		if (*(inIter) == "CR") loop_reloaded->setRecognizer(CharRecognizer::loadVect(inIter), mMin_loaded, mMax_loaded);
+		else if(*(inIter) == "XSEL") loop_reloaded->setRecognizer(ExclusiveSelector::loadVect(inIter), mMin_loaded, mMax_loaded);
+		else if(*(inIter) == "SEL") loop_reloaded->setRecognizer(Selector::loadVect(inIter), mMin_loaded, mMax_loaded);
+		else if(*(inIter) == "SEQ") loop_reloaded->setRecognizer(Sequence::loadVect(inIter), mMin_loaded, mMax_loaded);
+    else if(*(inIter) == "LOOP") loop_reloaded->setRecognizer(Loop::loadVect(inIter), mMin_loaded, mMax_loaded);
+    else if(*(inIter) == "XCR") loop_reloaded->setRecognizer(CharRange::loadVect(inIter), mMin_loaded, mMax_loaded);
+    else if(*(inIter) == "LIT") loop_reloaded->setRecognizer(Literal::loadVect(inIter), mMin_loaded, mMax_loaded);
+    else if(*(inIter) == "RECP") loop_reloaded->setRecognizer(RecognizerPointer::loadVect(inIter), mMin_loaded, mMax_loaded);
+    else std::cerr << "ERROR : Type not recognized" << '\n';
+	}
+	else
+		cerr << "ERROR : No SELECTOR tag found" << endl;
 	return (loop_reloaded);
 }
 
@@ -1124,8 +668,7 @@ bool Loop::equal(const std::shared_ptr<Recognizer> &LOP){
 //DEBUG FUNCTION
 void Loop::printtype(){
 	cout << "type : Loop";
-	//DEBUG FUNCTION
-							mRecognizer->printtype();
+	mRecognizer->printtype();
 
 }
 
@@ -1141,7 +684,14 @@ size_t CharRange::_feed(const shared_ptr<ParserContextBase> &ctx, const string &
 void CharRange::_optimize(int recursionLevel){
 
 }
-
+/**
+    Saves CharRange attributes in a file
+		write format is : XCR mBegin mEnd
+		TAG is "LOOP"
+    @param std:: ofstream out stream of the file.
+					long : save position inside the file
+    @return void
+*/
 void CharRange::save(std::ofstream& outFile, long &savePos){
 
 		outFile.seekp(savePos, ios::beg);
@@ -1156,42 +706,17 @@ void CharRange::save(std::ofstream& outFile, long &savePos){
 		}
 }
 
+/**
+    Creates a CharRange from parsed data
 
-//MODIFIE PAR IYED
-shared_ptr<CharRange> CharRange::load(std::ifstream& inFile, long &loadPos){
-
-	inFile.seekg(loadPos, ios::beg);
-	if(inFile){
-		int mBegin_loaded = false;
-		int mEnd_loaded = 0;
-		std::string tag = "";
-		inFile >> tag ;
-
-			if (tag == "XCR"){
-				inFile >> mBegin_loaded >> mEnd_loaded;
-
-				loadPos = inFile.tellg();
-			}
-			else{
-				cerr << "ERROR : no CHARRANGE tag found" << endl;
-			}
-			return make_shared<CharRange>(mBegin_loaded, mEnd_loaded);
-		}
-	else{
-		cerr << "ERROR : file stream unavailable" << endl;
-	}
-	return NULL;
-}
-
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
+    @return shared_ptr<CharRange>
+*/
 shared_ptr<CharRange> CharRange::loadVect(std::vector<string>::const_iterator &inIter){
-//  cout << "DEBUG : tag : <" << *(inIter) << ">";
-
 	if(*(inIter) == "XCR"){
     int mBegin_loaded =  stoi(*(++inIter));
-//    cout << " | mMin : <" << *(inIter) << ">"<< endl;
-
     int mEnd_loaded =  stoi(*(++inIter));
-  //  cout << " | mMin : <" << *(inIter) << ">"<< endl;
     ++inIter;
     return make_shared<CharRange>(mBegin_loaded, mEnd_loaded);
   }
@@ -1254,54 +779,35 @@ bool Literal::_getTransitionMap(TransitionMap* mask){
 	return true;
 }
 
+/**
+    Saves Literal attributes in a file
+		write format is : TAG mLiteral
+		TAG is "LIT"
+    @param std:: ofstream out stream of the file.
+					long : save position inside the file
+    @return void
+*/
 void Literal::save(std::ofstream& outFile, long &savePos){
-
-			outFile.seekp(savePos, ios::beg);
-
-			if(outFile){
-
-				outFile << "LIT" << " " << mLiteral  << " " ;
-				savePos = outFile.tellp();
-			}
-			else{
-				cerr << "error writing to file : ecriture dans le fichier impossibe" << endl;
-			}
+	outFile.seekp(savePos, ios::beg);
+	if(outFile){
+		outFile << "LIT" << " " << mLiteral  << " " ;
+		savePos = outFile.tellp();
 	}
-
-
-
-shared_ptr<Literal> Literal::load(std::ifstream& inFile, long &loadPos){
-
-		inFile.seekg(loadPos, ios::beg);
-		if(inFile){
-			string mliteral_loaded;
-
-			std::string tag = "";
-			inFile >> tag ;
-
-				if (tag == "LIT"){
-					inFile >> mliteral_loaded;
-
-					loadPos = inFile.tellg();
-				}
-				else{
-					cerr << "ERROR : no LITERAL tag found" << endl;
-				}
-				return make_shared<Literal>(mliteral_loaded);
-			}
-		else{
-			cerr << "ERROR : file stream unavailable" << endl;
-		}
-		return NULL;
+	else{
+		cerr << "error writing to file : ecriture dans le fichier impossibe" << endl;
 	}
+}
 
+/**
+    Creates a Literal from parsed data
 
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
+    @return shared_ptr<CharRange>
+*/
 shared_ptr<Literal> Literal::loadVect(std::vector<string>::const_iterator &inIter){
-//  cout << "DEBUG : tag : <" << *(inIter) << ">";
-
   if((*inIter) == "LIT"){
     string mliteral_loaded =  *(++inIter);
-//    cout << " | string : <" << *(inIter) << ">"<< endl;
     ++inIter;
     return make_shared<Literal>(mliteral_loaded);
   }
@@ -1319,10 +825,10 @@ bool Literal::equal(const shared_ptr<Recognizer> &LIT){
 		return(LIT_local->mLiteral == mLiteral) ? true : false;
 	}
 
-	//DEBUG FUNCTION
-	void Literal::printtype(){
-		cout << "type : Literal";
-	}
+//DEBUG FUNCTION
+void Literal::printtype(){
+	cout << "type : Literal";
+}
 
 
 
@@ -1362,144 +868,51 @@ void RecognizerPointer::_optimize(int recursionLevel){
 }
 
 
-//MODIFIE PAR IYED
+/**
+    Saves Literal attributes in a file
+		write format is : TAG mRecognizer
+		TAG is "RECP"
+    @param std:: ofstream out stream of the file.
+					long : save position inside the file
+    @return void
+*/
 void RecognizerPointer::save(std::ofstream& outFile, long &savePos){
-
-		outFile.seekp(savePos, ios::beg);
-		if(outFile){
-			outFile << "RECP" << " ";
-			mRecognizer->save(outFile, savePos);
-		}
-		else{
-			cerr << "ERROR : file stream unavailable" << endl;
-		}
-}
-
-//MODIFIE PAR IYED
-shared_ptr<RecognizerPointer> RecognizerPointer::load(std::ifstream& inFile, long &loadPos){
-	inFile.seekg(loadPos, ios::beg);
-	shared_ptr<RecognizerPointer> recognpointer_reloaded = NULL; //type de retour
-
-	if(inFile){
-
-
-		std::string tag = "";
-		inFile >> tag ;
-
-
-			if (tag == "RECP"){
-					loadPos = inFile.tellg();
-
-
-
-					long pos_pre_tag = inFile.tellg();
-					inFile >> tag;
-
-					if (tag == "CR"){
-							inFile.seekg(pos_pre_tag, ios::beg);
-							const shared_ptr<CharRecognizer> mRecognizer_loaded = CharRecognizer::load(inFile, loadPos);
-							recognpointer_reloaded = make_shared<RecognizerPointer>();
-							recognpointer_reloaded->setPointed(mRecognizer_loaded); //houni errue
-
-					}
-					else if(tag == "SEL"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Selector> mRecognizer_loaded = (Selector::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else if(tag == "XSEL"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<ExclusiveSelector> mRecognizer_loaded = (ExclusiveSelector::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else if(tag == "SEQ"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Sequence> mRecognizer_loaded = (Sequence::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else if(tag == "LOOP"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Loop> mRecognizer_loaded = (Loop::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else if(tag == "XCR"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<CharRange> mRecognizer_loaded = (CharRange::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else if(tag == "LIT"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<Literal> mRecognizer_loaded = (Literal::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else if(tag == "RECP"){
-						inFile.seekg(pos_pre_tag, ios::beg);
-						const shared_ptr<RecognizerPointer> mRecognizer_loaded = (RecognizerPointer::load(inFile, loadPos));
-						recognpointer_reloaded = make_shared<RecognizerPointer>();
-						recognpointer_reloaded->setPointed(mRecognizer_loaded);
-					}
-					else
-							std::cerr << "Undefined Recognizer type" << '\n';
-
-
-			}
-			else{
-				cerr << "no RECONGIZER PTR tag found" << endl;
-			}
+	outFile.seekp(savePos, ios::beg);
+	if(outFile){
+		outFile << "RECP" << " ";
+		mRecognizer->save(outFile, savePos);
 	}
 	else{
-		cerr << "lecture du fichier impossible" << endl;
+		cerr << "ERROR : file stream unavailable" << endl;
 	}
-	return recognpointer_reloaded;
 }
 
+/**
+    Creates a RecognizerPointer from parsed data
+
+    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+		elements are parsed with space as separator
+    @return shared_ptr<RecognizerPointer>
+*/
 shared_ptr<RecognizerPointer> RecognizerPointer::loadVect(std::vector<string>::const_iterator &inIter){
-//  cout << "DEBUG : tag : <" << *(inIter) << ">";
-	shared_ptr<RecognizerPointer> recognpointer_reloaded = NULL; //type de retour
+	shared_ptr<RecognizerPointer> recognpointer_reloaded = NULL;
 
 	if((*inIter) == "RECP"){
     ++inIter;
     recognpointer_reloaded = make_shared<RecognizerPointer>();
-//    cout << " | taginside : <" << *(inIter) << ">" << endl;
-
-					if ((*inIter) == "CR"){
-							recognpointer_reloaded->setPointed(CharRecognizer::loadVect(inIter)); //houni errue
-					}
-					else if ((*inIter) == "SEL"){
-							recognpointer_reloaded->setPointed(Selector::loadVect(inIter)); //houni errue
-					}
-					else if((*inIter) == "XSEL"){
-            recognpointer_reloaded->setPointed(ExclusiveSelector::loadVect(inIter)); //houni errue
-					}
-					else if((*inIter) == "SEQ"){
-            recognpointer_reloaded->setPointed(Sequence::loadVect(inIter)); //houni errue
-					}
-					else if((*inIter) == "LOOP"){
-            recognpointer_reloaded->setPointed(Loop::loadVect(inIter)); //houni errue
-					}
-					else if((*inIter) == "XCR"){
-            recognpointer_reloaded->setPointed(CharRange::loadVect(inIter)); //houni errue
-					}
-					else if((*inIter) == "LIT"){
-            recognpointer_reloaded->setPointed(Literal::loadVect(inIter)); //houni errue
-					}
-					else if((*inIter) == "RECP"){
-            recognpointer_reloaded->setPointed(RecognizerPointer::loadVect(inIter)); //houni errue
-					}
-					else
-							std::cerr << "Undefined Recognizer type" << '\n';
-
-
-			}
-			else{
-				cerr << "no RECONGIZER PTR tag found" << endl;
-			}
+		if ((*inIter) == "CR") recognpointer_reloaded->setPointed(CharRecognizer::loadVect(inIter));
+		else if ((*inIter) == "SEL") recognpointer_reloaded->setPointed(Selector::loadVect(inIter));
+		else if((*inIter) == "XSEL") recognpointer_reloaded->setPointed(ExclusiveSelector::loadVect(inIter));
+		else if((*inIter) == "SEQ") recognpointer_reloaded->setPointed(Sequence::loadVect(inIter));
+		else if((*inIter) == "LOOP") recognpointer_reloaded->setPointed(Loop::loadVect(inIter));
+		else if((*inIter) == "XCR") recognpointer_reloaded->setPointed(CharRange::loadVect(inIter));
+		else if((*inIter) == "LIT") recognpointer_reloaded->setPointed(Literal::loadVect(inIter));
+		else if((*inIter) == "RECP") recognpointer_reloaded->setPointed(RecognizerPointer::loadVect(inIter));
+		else std::cerr << "Undefined Recognizer type" << '\n';
+	}
+	else{
+		cerr << "no RECONGIZER POINTER tag found" << endl;
+	}
 	return recognpointer_reloaded;
 }
 
@@ -1634,16 +1047,10 @@ void Grammar::saveRulesMap(ofstream &outFile){
 	long grammarSavePosition = 0;
 		if(outFile){
 			for(map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin(); it != mRules.end() ;it++){
-
-				//saving the rule key
 				outFile.seekp(grammarSavePosition, ios::beg);
 				outFile << it->first << " => ";
-			//	cout << "DEBUG : key : " << it->first << endl;//"|| value : "; (it->second)->printtype();
 				grammarSavePosition = outFile.tellp();
-
 				(it->second)->save(outFile, grammarSavePosition); //recognizer
-
-		//		cout << "DEBUG : no seg fault yet : value ok" << endl;
 				outFile << "\r\n";
 			}
 		}
@@ -1652,132 +1059,78 @@ void Grammar::saveRulesMap(ofstream &outFile){
 		}
 	}
 
-
-
-std::map<std::string,std::shared_ptr<Recognizer>> Grammar::loadRulesMap(ifstream &inFile){
-
-
-  long grammarLoadPosition = 0;
-	string tempKey = "";
-	string tempTag = "";
-	shared_ptr<Recognizer> tempValue = NULL;
-	std::map<std::string,std::shared_ptr<Recognizer>> mRulesLoaded;
-	string separator = "";
-
-		if(inFile){
-		while(!inFile.eof()){
-
-			inFile >> tempKey ;
-			inFile >> separator;
-		while (separator != "=>") {
-			tempKey +=separator;
-			inFile >> separator;
-		}
-			if(separator != "=>"){cerr << "ERROR reading file : file format non conform";}
-			grammarLoadPosition = inFile.tellg();
-
-			inFile >> tempTag;
-			//cout << "DEBUG : key :" << tempKey;
-			//cout << "|| separator : " << separator ;
-			//cout << " || tag : " << tempTag << endl;
-			if (inFile.eof()) break;
-
-			if(tempTag == "CR"){tempValue = CharRecognizer::load(inFile,grammarLoadPosition);}
-			if(tempTag == "SEL"){tempValue = Selector::load(inFile,grammarLoadPosition);}
-			if(tempTag == "XSEL"){tempValue = ExclusiveSelector::load(inFile,grammarLoadPosition);}
-			if(tempTag == "XCR"){tempValue = CharRange::load(inFile,grammarLoadPosition);}
-			if(tempTag == "SEQ"){tempValue = Sequence::load(inFile,grammarLoadPosition);}
-			if(tempTag == "LOOP"){tempValue = Loop::load(inFile,grammarLoadPosition);}
-			if(tempTag == "LIT"){tempValue = Literal::load(inFile,grammarLoadPosition);}
-			if(tempTag == "RECP"){tempValue = RecognizerPointer::load(inFile,grammarLoadPosition);}
-			mRulesLoaded[tempKey] = tempValue;
-
-		}
-		}
-
-		return mRulesLoaded;
-
-	}
-
 template<typename Out>
   void split(const std::string &s, char delim, Out result) {
       std::stringstream ss;
       ss.str(s);
       std::string item;
       while (std::getline(ss, item, delim)) {
-          *(result++) = item; //seg fault from here ==12114== Conditional jump or move depends on uninitialised value(s)
+          *(result++) = item;
       }
   }
 
 
   std::vector<std::string> split(const std::string &s, char delim) {
       std::vector<std::string> elems;
-      split(s, delim, std::back_inserter(elems)); //seg fault from here ==12114== Conditional jump or move depends on uninitialised value(s)
+      split(s, delim, std::back_inserter(elems));
       return elems;
   }
 
 
 shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 
-  string mNameLoaded = "";
-  string separator = "";
-  vector <string> fileStringRules; // vecteur contenant les regles de la grammaaire en format string
-
-//  long grammarLoadPosition = 0;
-  string tempKey = "";
-  string tempTag = "";
-  shared_ptr<Recognizer> tempValue = NULL;
-  std::map<std::string,std::shared_ptr<Recognizer>> mRulesLoaded;
-
-
-  ifstream inFile (fileName, ios::in | ios::binary);
+  string mNameLoaded = ""; // grammar name
+  string separator = ""; // local variable to parse file separators
+  vector <string> fileStringRules;
+  string tempKey = ""; // local variable to parse rules names
+  string tempTag = ""; // local varaible to parse rules tag
+  shared_ptr<Recognizer> tempValue = NULL; // local variable to parse rules Recognizer
+  std::map<std::string,std::shared_ptr<Recognizer>> mRulesLoaded; //map containing all grammar rules for return value
+  ifstream inFile (fileName, ios::in | ios::binary); //file stream to work on
 
   if ( !inFile )
-    cout << "fichier inexistant";
+    cout << "ERROR : error reading file : no such name";
   else{
-//lecture du nom de la grammaire
-//  cout << "INSIDE THA MATRIX : no seg fault yet" << endl;
-
-    std::stringstream buffer; // variable contenant l'intégralité du fichier
+		//read the whole file in one shot
+    std::stringstream buffer;
     buffer << inFile.rdbuf();
     inFile.close();
-    string stringBuffer = buffer.str(); // string contenant l'integralité du fichier
-    std::vector<std::string> fileStringRules = split(stringBuffer, '\n'); // vecteur ou chaque ligne est une ligne du fichier
-  //  cout << "DEBUG : file :<" << stringBuffer << ">;" << endl;
 
-    vector<string>::const_iterator fileIter = fileStringRules.begin(); //iterateur
-//    cout << "file parsed and into the vector : no seg fault yet" << endl;
+    string stringBuffer = buffer.str(); //convert it into a regular string for parsing purposes
+    std::vector<std::string> fileStringRules = split(stringBuffer, '\n'); // split the buffer into '\n' separated stringstream
+		//fileStringRules each colun represents a line in the file
+
+		//split the first line with ' ' as separator
+    vector<string>::const_iterator fileIter = fileStringRules.begin();
     string line = (*fileIter);
-  //  cout << "DEBUG : first line :<" << line << ">;" << endl;
-    std::vector<std::string> result = split(line, ' ');
+    std::vector<std::string> result = split(line, ' '); //variable reused for each line parsing
     vector<string>::const_iterator it = result.begin();
 
-  //  cout << "DEBUG: first line parsed and into the vector : no seg fault yet" << endl;
-
+		//read the first line and parse grammar name : support for space separated rule names
     mNameLoaded = *(it);
     separator = *(++it);
     while (separator != "==>") {
       mNameLoaded += ( " " + separator);
       separator = *(++it);
-    //  cout << "DEBUG : sepp" << separator << endl;
     }
 
-//  cout << "DEBUG : file opened HAMDOULAH" << endl << "DEBUG : grammar name : <" << mNameLoaded << "> | <" << separator << ">"<<  endl;
-  ++fileIter;
-//lecture des regles de la grammaire
+  	++fileIter;
+		//file iter is on the second elemetn of the vector meaning the first line of the rules list
     while( fileIter !=  fileStringRules.end() )
     {
         line =  (*fileIter);
-        line.erase(line.size()-1,1);
-    //    cout << "DEBUG : line parsed : <" << line << ">;" <<  endl;
+        line.erase(line.size()-1,1); // since grammar are written with a CRLF format: we have at each end of line a "\r\n"
+				//we parsed based on \n so now we have at each end of line a useless \r character
         result = split(line, ' ');
         it = result.begin();
-        tempKey = *it;
+				//parsing the rule name : support for space separated rule names
+				tempKey = *it;
         separator = *(++it);
         while (separator != "=>") {
           tempKey +=separator;
           separator = *(++it);
         }
+				//Parse the recognizer based on the tag found at the beginning
         tempTag = *(++it);
         if(tempTag == "CR"){tempValue = CharRecognizer::loadVect(it);}
   			if(tempTag == "SEL"){tempValue = Selector::loadVect(it);}
@@ -1807,42 +1160,18 @@ void Grammar::createGrammarDump(string dumpFileName){
 	outFile.close();
 }
 
-shared_ptr<Grammar> Grammar::createLoadedGrammar(string fileName){
-	//The created grammar has the name of the file containing its rules
-	string mNameLoaded = "";
-	string separator = "";
-	ifstream inFile (fileName, ios::in | ios::binary);
-	inFile >> mNameLoaded;
-	inFile >> separator;
-	while (separator != "==>") {
-		mNameLoaded += (" " +separator);
-		inFile >> separator;
-	}
-
-	std::map<std::string,std::shared_ptr<Recognizer>> mRulesLoaded = Grammar::loadRulesMap(inFile);
-	inFile.close();
-
-	shared_ptr<Grammar> retGram = make_shared<Grammar>(mNameLoaded);
-	retGram->mRules = mRulesLoaded;
-	return retGram;
-}
 
 bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 		bool condition = true;
 
 		if(mName != gramCompared->mName){condition = false;}
-	//	cout << "DEBUG :source name : "<< mName << " target name : " << gramCompared->mName << endl;
 		map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin();
 		map<string,shared_ptr<Recognizer>>::iterator itComp= gramCompared->mRules.begin();
 
 		while (it != mRules.end() && condition){
-		/*		cout << "DEBUG : first element key : " << it->first << "|| second element key : " << itComp->first << endl;
-				cout << "DEBUG : first element value: " ; (it->second)->printtype(); cout << endl;
-				cout<< "DEBUG : second element value: "; (itComp->second)->printtype();*/
 				if(it->first == itComp->first){
 					if(!(it->second)->equal(itComp->second)){
-	//					cout << "DEBUG : diffrent shit" << endl;
-						condition = false;
+					condition = false;
 					}
 
 				}
