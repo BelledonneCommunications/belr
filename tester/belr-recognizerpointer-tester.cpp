@@ -28,10 +28,19 @@
   static void char_recognizerpointer(void) {
     long savePosition = 0;
 
+        std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+        std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+        std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+
+
     //RecognizerPointer with one CharRecognizer
   		shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+      recognizptr->setName("@rule");
   		shared_ptr<CharRecognizer> caractere2 = Foundation::charRecognizer('a', false);
   	  recognizptr->setPointed(caractere2);
+      mRecognizerPointersLoaded.push_back(recognizptr);
+      rcptrItEnd = (mRecognizerPointersLoaded.end());
+      rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
       BC_ASSERT_EQUAL(recognizptr->feed(NULL, "a", 0) ,1, int, "%d");
 
@@ -45,7 +54,7 @@
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
 
 
@@ -58,10 +67,14 @@
   static void sel_recognizerpointer(void) {
     long savePosition = 0;
 
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
     	//RecognizerPointer with a selector of 4 characters
     		shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+        recognizptr->setName("@rule");
     		shared_ptr<Selector> selector1 = Foundation::selector(false);
     		shared_ptr<CharRecognizer> characterSel1 = Foundation::charRecognizer('a', false);
     	  shared_ptr<CharRecognizer> characterSel2 = Foundation::charRecognizer('b', false);
@@ -72,6 +85,9 @@
     	  selector1->addRecognizer(characterSel3);
     	  selector1->addRecognizer(characterSel4);
     		recognizptr->setPointed(selector1);
+        mRecognizerPointersLoaded.push_back(recognizptr);
+        rcptrItEnd = (mRecognizerPointersLoaded.end());
+        rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 
         BC_ASSERT_EQUAL(recognizptr->feed(NULL, "a", 0) ,1, int, "%d");
@@ -88,7 +104,7 @@
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+        const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
         remove("test-recp.bin");
 
 
@@ -102,10 +118,14 @@
   }
   static void xsel_recognizerpointer(void) {
     long savePosition = 0;
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
     //RecognizerPointer with a selector of 4 characters
       shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+      recognizptr->setName("@rule");
       shared_ptr<Selector> selector1 = Foundation::selector(true);
       shared_ptr<CharRecognizer> characterSel1 = Foundation::charRecognizer('a', false);
       shared_ptr<CharRecognizer> characterSel2 = Foundation::charRecognizer('b', false);
@@ -116,6 +136,9 @@
       selector1->addRecognizer(characterSel3);
       selector1->addRecognizer(characterSel4);
       recognizptr->setPointed(selector1);
+      mRecognizerPointersLoaded.push_back(recognizptr);
+      rcptrItEnd = (mRecognizerPointersLoaded.end());
+      rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 
       BC_ASSERT_EQUAL(recognizptr->feed(NULL, "a", 0) ,1, int, "%d");
@@ -132,7 +155,7 @@
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
 
 
@@ -147,14 +170,22 @@
 static void loop_recognizerpointer(void) {
     long savePosition = 0;
 
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
     //RecognizerPointer with a loop of one character
 
   		shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+      recognizptr->setName("@rule");
   		shared_ptr<Loop> loopCar = Foundation::loop();
   		shared_ptr<CharRecognizer> characterLoop2 = Foundation::charRecognizer('a', false);
   		loopCar->setRecognizer(characterLoop2, 0, 3);
   		recognizptr->setPointed(loopCar);
+      mRecognizerPointersLoaded.push_back(recognizptr);
+      rcptrItEnd = (mRecognizerPointersLoaded.end());
+      rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
 
       BC_ASSERT_EQUAL(recognizptr->feed(NULL, "a", 0) ,1, int, "%d");
 
@@ -168,7 +199,7 @@ static void loop_recognizerpointer(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
 
 
@@ -181,10 +212,14 @@ static void loop_recognizerpointer(void) {
 
 static void sequence_recognizerpointer(void) {
     long savePosition = 0;
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
     //RecognizerPointer with a sequence of 4 characters
   		shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+      recognizptr->setName("@rule");
   		shared_ptr<Sequence> sequence1 = Foundation::sequence();
   		shared_ptr<CharRecognizer> characterSequence1 = Foundation::charRecognizer('a', false);
   		shared_ptr<CharRecognizer> characterSequence2 = Foundation::charRecognizer('b', false);
@@ -195,6 +230,9 @@ static void sequence_recognizerpointer(void) {
   		sequence1->addRecognizer(characterSequence3);
   		sequence1->addRecognizer(characterSequence4);
   		recognizptr->setPointed(sequence1);
+      mRecognizerPointersLoaded.push_back(recognizptr);
+      rcptrItEnd = (mRecognizerPointersLoaded.end());
+      rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 
           BC_ASSERT_EQUAL(recognizptr->feed(NULL, "abcd", 0) ,4, int, "%d");
@@ -208,7 +246,7 @@ static void sequence_recognizerpointer(void) {
           std::vector<std::string> result = split(content, ' ');
           vector<string>::const_iterator i = result.begin();
 
-          const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+          const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
           remove("test-recp.bin");
 
 
@@ -220,12 +258,19 @@ static void sequence_recognizerpointer(void) {
   static void literal_recognizerpointer(void) {
     long savePosition = 0;
 
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
     	// Selector with a Literal
     		shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+        recognizptr->setName("@rule");
     		const shared_ptr<Literal> stringBasic = dynamic_pointer_cast<Literal>(Utils::literal("abcd"));
     		recognizptr->setPointed(stringBasic);
+        mRecognizerPointersLoaded.push_back(recognizptr);
+        rcptrItEnd = (mRecognizerPointersLoaded.end());
+        rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 
           BC_ASSERT_EQUAL(recognizptr->feed(NULL, "abcd", 0) ,4, int, "%d");
@@ -239,7 +284,7 @@ static void sequence_recognizerpointer(void) {
           std::vector<std::string> result = split(content, ' ');
           vector<string>::const_iterator i = result.begin();
 
-          const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+          const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
           remove("test-recp.bin");
 
 
@@ -250,12 +295,20 @@ static void sequence_recognizerpointer(void) {
   }
 static void xchar_recognizerpointer(void) {
     long savePosition = 0;
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
     //Selector with a CharRange
   		shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
+      recognizptr->setName("@rule");
   		const shared_ptr<CharRange> charRange = dynamic_pointer_cast<CharRange>(Utils::char_range(97, 100));
   		recognizptr->setPointed(charRange);
+      mRecognizerPointersLoaded.push_back(recognizptr);
+      rcptrItEnd = (mRecognizerPointersLoaded.end());
+      rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
 
       BC_ASSERT_EQUAL(recognizptr->feed(NULL, "abcd", 0) ,1, int, "%d");
 
@@ -268,7 +321,7 @@ static void xchar_recognizerpointer(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+      const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
 
 
@@ -282,12 +335,23 @@ static void xchar_recognizerpointer(void) {
 static void recp_recognizerpointer(void) {
     long savePosition = 0;
 
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
     shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
     shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();
+    recognizptr->setName("@rule");
+    recognizptrCar->setName("@ruleCar");
+
     shared_ptr<CharRecognizer> characterRecognizerPtr2 = Foundation::charRecognizer('a', false);
     recognizptrCar->setPointed(characterRecognizerPtr2);
     recognizptr->setPointed(recognizptrCar);
+    mRecognizerPointersLoaded.push_back(recognizptr);
+    mRecognizerPointersLoaded.push_back(recognizptrCar);
+    rcptrItEnd = (mRecognizerPointersLoaded.end());
+    rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
 
     BC_ASSERT_EQUAL(recognizptr->feed(NULL, "a", 0) ,1, int, "%d");
 
@@ -299,7 +363,7 @@ static void recp_recognizerpointer(void) {
     getline(ifichier, content);
     std::vector<std::string> result = split(content, ' ');
     vector<string>::const_iterator i = result.begin();
-    const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i);
+    const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
     remove("test-recp.bin");
 
     BC_ASSERT_TRUE(recognizptr->equal(recognizptrLoaded));

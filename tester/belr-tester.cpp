@@ -66,7 +66,7 @@ static void log_handler(int lev, const char *fmt, va_list args) {
 
 void belr_tester_init(void(*ftester_printf)(int level, const char *fmt, va_list args)) {
 	if (ftester_printf == NULL) ftester_printf = log_handler;
-	bc_tester_init(ftester_printf, BCTBX_LOG_MESSAGE, BCTBX_LOG_ERROR, "recognizers_grammars");
+	bc_tester_init(ftester_printf, BCTBX_LOG_MESSAGE, BCTBX_LOG_ERROR, "grammars");
 
 	bc_tester_add_suite(&recognizer_char_test_suite);
 	bc_tester_add_suite(&recognizer_selector_test_suite);
@@ -78,7 +78,7 @@ void belr_tester_init(void(*ftester_printf)(int level, const char *fmt, va_list 
 	bc_tester_add_suite(&recognizer_recognizerpointer_test_suite);
 	bc_tester_add_suite(&grammar_simple_test_suite);
 	bc_tester_add_suite(&grammar_vcardgrammar_suite);
-	//bc_tester_add_suite(&vcard_test_suite);
+	bc_tester_add_suite(&grammar_sipgrammar_suite);
 
 
 }

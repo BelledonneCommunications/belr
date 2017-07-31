@@ -51,6 +51,7 @@ const shared_ptr<Literal> chaine = dynamic_pointer_cast<Literal>(Utils::literal(
     cout << "FAILED : Literal feed gone wrong" << endl;
   }
 
+  remove("test-lit.bin");
 
 
 //SAVE AND LOAD

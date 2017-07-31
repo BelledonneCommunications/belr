@@ -33,6 +33,11 @@ extern std::vector<std::string> split(const std::string &s, char delim);
 
 static void char_loop(void) {
   long savePosition = 0;
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Loop with one CharRecognizer
   shared_ptr<Loop> loopCar = Foundation::loop();
@@ -50,7 +55,7 @@ static void char_loop(void) {
 
     std::vector<std::string> result = split(content, ' ');
     vector<string>::const_iterator it = result.begin();
-    const shared_ptr<Loop> loopCarLoaded = Loop::loadVect(it);
+    const shared_ptr<Loop> loopCarLoaded = Loop::loadVect(it , rcptrItBegin, rcptrItEnd);
     ifichier.close();
     remove("test-loop.bin");
 
@@ -63,6 +68,11 @@ static void char_loop(void) {
 static void xsel_loop(void) {
   long savePosition = 0;
 
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Loop with one ExclusiveSelector
   shared_ptr<Loop> loopExSel = Foundation::loop();
@@ -94,7 +104,7 @@ static void xsel_loop(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<Loop> loopExSelLoaded = Loop::loadVect(i);
+      const shared_ptr<Loop> loopExSelLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
       ifichier.close();
       remove("test-loop.bin");
 
@@ -109,7 +119,11 @@ static void xsel_loop(void) {
 }
 static void sel_loop(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Loop with one Selector
   shared_ptr<Loop> loopSel = Foundation::loop();
@@ -141,7 +155,7 @@ static void sel_loop(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<Loop> loopSelLoaded = Loop::loadVect(i);
+      const shared_ptr<Loop> loopSelLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
       ifichier.close();
       remove("test-loop.bin");
 
@@ -156,7 +170,11 @@ static void sel_loop(void) {
 }
 static void loop_loop(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Selector with a loop of one character
     shared_ptr<Loop> loopLoop = Foundation::loop();
@@ -178,7 +196,7 @@ static void loop_loop(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Loop> loopLoopLoaded = Loop::loadVect(i);
+        const shared_ptr<Loop> loopLoopLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-loop.bin");
 
@@ -190,7 +208,11 @@ static void loop_loop(void) {
 }
 static void sequence_loop(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Loop with one Sequence
 
@@ -220,7 +242,7 @@ static void sequence_loop(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Loop> loopSequenceLoaded = Loop::loadVect(i);
+        const shared_ptr<Loop> loopSequenceLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-loop.bin");
 
@@ -232,7 +254,11 @@ static void sequence_loop(void) {
 }
 static void literal_loop(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Loop with one Literal
   shared_ptr<Loop> loopLiteral = Foundation::loop();
@@ -253,7 +279,7 @@ static void literal_loop(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Loop> loopLiteralLoaded = Loop::loadVect(i);
+        const shared_ptr<Loop> loopLiteralLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-loop.bin");
 
@@ -266,7 +292,11 @@ static void literal_loop(void) {
 
 static void xchar_loop(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Loop with one CharRange
   shared_ptr<Loop> loopCharRange = Foundation::loop();
@@ -286,7 +316,7 @@ static void xchar_loop(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Loop> loopCharRangeLoaded = Loop::loadVect(i);
+        const shared_ptr<Loop> loopCharRangeLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-loop.bin");
 
@@ -300,16 +330,23 @@ static void xchar_loop(void) {
 }
 static void recp_loop(void) {
   long savePosition = 0;
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
 
   //Loop with one Recognizer Pointer
   shared_ptr<Loop> loopRecPointer = Foundation::loop();
   shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();
+  recognizptrCar->setName("@rule");
   shared_ptr<CharRecognizer> characterRecognizerPtr2 = Foundation::charRecognizer('a', false);
   recognizptrCar->setPointed(characterRecognizerPtr2);
   loopRecPointer->setRecognizer(recognizptrCar,0,3);
-  loopRecPointer->feed(NULL, "a", 0);
+  mRecognizerPointersLoaded.push_back(recognizptrCar);
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
       BC_ASSERT_EQUAL(loopRecPointer->feed(NULL, "a", 0) ,1, int, "%d");
 
       ofstream ofichier ("test-loop.bin", ios::out | ios::app);
@@ -323,7 +360,7 @@ static void recp_loop(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<Loop> loopRecPointerLoaded = Loop::loadVect(i);
+      const shared_ptr<Loop> loopRecPointerLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
       ifichier.close();
       remove("test-loop.bin");
 

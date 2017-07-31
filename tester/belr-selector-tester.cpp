@@ -28,6 +28,13 @@ extern std::vector<std::string> split(const std::string &s, char delim);
 static void char_selector(void) {
   long savePosition = 0;
 
+    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    rcptrItEnd = (mRecognizerPointersLoaded.end());
+    rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
+
   //Selector with 4 characters
   	shared_ptr<Selector> selector = Foundation::selector(false);
   	shared_ptr<CharRecognizer> characterSel1 = Foundation::charRecognizer('a', false);
@@ -53,7 +60,7 @@ static void char_selector(void) {
     getline(ifichier, content);
     std::vector<std::string> result = split(content, ' ');
     vector<string>::const_iterator i = result.begin();
-    const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+    const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
     ifichier.close();
     remove("test-sel.bin");
 
@@ -70,6 +77,11 @@ static void char_selector(void) {
 static void xsel_selector(void) {
   long savePosition = 0;
 
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Selector with an Exclusive Selector inside
   shared_ptr<Selector> selector = Foundation::selector(false);
@@ -101,7 +113,7 @@ static void xsel_selector(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+      const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
       ifichier.close();
       remove("test-sel.bin");
 
@@ -116,6 +128,9 @@ static void xsel_selector(void) {
 }
 static void sel_selector(void) {
   long savePosition = 0;
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
   //Selector with an Exclusive Selector inside
@@ -148,7 +163,7 @@ static void sel_selector(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+      const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
       ifichier.close();
       remove("test-sel.bin");
 
@@ -164,7 +179,11 @@ static void sel_selector(void) {
 static void loop_selector(void) {
   long savePosition = 0;
 
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
   //Selector with a loop of one character
   	shared_ptr<Selector> selector = Foundation::selector(false);
   	shared_ptr<Loop> loopCar = Foundation::loop();
@@ -185,7 +204,7 @@ static void loop_selector(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-sel.bin");
 
@@ -197,7 +216,11 @@ static void loop_selector(void) {
 }
 static void sequence_selector(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   //Selector with a sequence of 4 characters
   	shared_ptr<Selector> selector = Foundation::selector(false);
@@ -226,7 +249,7 @@ static void sequence_selector(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-sel.bin");
 
@@ -238,7 +261,11 @@ static void sequence_selector(void) {
 }
 static void literal_selector(void) {
   long savePosition = 0;
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
   // Selector with a Literal
   	shared_ptr<Selector> selector = Foundation::selector(false);
@@ -258,7 +285,7 @@ static void literal_selector(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-sel.bin");
 
@@ -271,7 +298,11 @@ static void literal_selector(void) {
 static void xchar_selector(void) {
   long savePosition = 0;
 
-
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
   //Selector with a CharRange
   	shared_ptr<Selector> selector = Foundation::selector(false);
   	const shared_ptr<CharRange> charRange1 = dynamic_pointer_cast<CharRange>(Utils::char_range(97, 100));
@@ -297,7 +328,7 @@ static void xchar_selector(void) {
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
 
-        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+        const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
         ifichier.close();
         remove("test-sel.bin");
 
@@ -315,14 +346,22 @@ static void xchar_selector(void) {
 static void recp_selector(void) {
   long savePosition = 0;
 
+  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 
   //Selector with a RecognizerPointer
   shared_ptr<Selector> selector = Foundation::selector(false);
   shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();
+  recognizptrCar->setName("@rule");
   shared_ptr<CharRecognizer> characterRecognizerPtr2 = Foundation::charRecognizer('a', false);
   recognizptrCar->setPointed(characterRecognizerPtr2);
   selector->addRecognizer(recognizptrCar);
+  mRecognizerPointersLoaded.push_back(recognizptrCar);
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
 
       BC_ASSERT_EQUAL(selector->feed(NULL, "a", 0) ,1, int, "%d");
 
@@ -337,7 +376,7 @@ static void recp_selector(void) {
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
 
-      const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i);
+      const shared_ptr<Selector> selectorLoaded = Selector::loadVect(i, rcptrItBegin, rcptrItEnd);
       ifichier.close();
       remove("test-sel.bin");
 

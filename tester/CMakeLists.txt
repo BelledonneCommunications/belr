@@ -29,6 +29,9 @@ endif()
 set(GRAMMAR_FILES
 #LES GRAMMAIRES A INSERER ICI
 #	grammars/.....
+	grammars/basicgrammar.txt
+	grammars/vcardgrammar.txt
+	grammars/sipgrammar.txt
 )
 
 set(HEADER_FILES_CXX belr-tester.hpp)
@@ -45,6 +48,7 @@ set(SOURCE_FILES_CXX
 	belr-recognizerpointer-tester.cpp
 	belr-basicgrammar-tester.cpp
 	belr-vcardgrammar-tester.cpp
+	belr-sipgrammar-tester.cpp
 
 )
 

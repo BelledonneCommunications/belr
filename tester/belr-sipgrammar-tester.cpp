@@ -1,5 +1,5 @@
 /*
-	belr-basicgrammar-tester.cpp
+	belr-sipgrammar-tester.cpp
 	Copyright (C) 2015  Belledonne Communications SARL
 
 	This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@ using namespace::std;
 using namespace::belr;
 
 
-static void basicgrammar_save(void) {
+static void sipgrammar_save(void) {
 
-  string grammarToParse = bc_tester_res("grammars/basicgrammar.txt");
+  string grammarToParse = bc_tester_res("grammars/sipgrammar.txt");
 
   ABNFGrammarBuilder builder;
 
@@ -38,6 +38,7 @@ static void basicgrammar_save(void) {
 
   //Save grammar
   string grammarDump = bc_tester_file("grammarDump.bin");
+
   grammar->createGrammarDump(grammarDump);
 
   //Load grammar
@@ -46,9 +47,10 @@ static void basicgrammar_save(void) {
   finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsedSecond = finish - start;
 
+  BC_ASSERT_FALSE(!loadedGram);
+
   remove(grammarDump.c_str());
 
-  BC_ASSERT_FALSE(!loadedGram);
 
   BC_ASSERT_TRUE(grammar->equal(loadedGram));
 
@@ -61,11 +63,11 @@ static void basicgrammar_save(void) {
 
 
 static test_t tests[] = {
-	TEST_NO_TAG("BASICGRAMMAR", basicgrammar_save),
+	TEST_NO_TAG("SIPGRAMMAR", sipgrammar_save),
 };
 
-test_suite_t grammar_simple_test_suite = {
-	"BasicGrammar Save and Load",
+test_suite_t grammar_sipgrammar_suite = {
+	"SipGrammar Save and Load",
 	NULL,
 	NULL,
 	NULL,

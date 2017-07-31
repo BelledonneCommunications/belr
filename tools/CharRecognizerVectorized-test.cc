@@ -54,6 +54,7 @@ int main(int argc, char *argv[]){
 	if (character2->feed(NULL, "a", 0) == 1) cout << "SUCESS : second feed successfull" << endl;
 	else cout << "FAILED : second feed gone wrong" << endl;
 
+  remove("test-char.bin");
 
 //SAVE AND LOAD
 	ofstream ofichier ("test-char.bin", ios::out | ios::app | ios::binary);
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]){
   vector<string>::const_iterator i = result.begin();
 
 
-  
+
   const shared_ptr<CharRecognizer> characterLoaded = CharRecognizer::loadVect(i);
 	const shared_ptr<CharRecognizer> characterLoaded2 = CharRecognizer::loadVect(i);
 	ifichier.close();

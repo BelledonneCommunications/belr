@@ -18,6 +18,11 @@ using namespace std;
 long savePosition = 0;
 long loadPosition = 0;
 
+std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+
+
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
     std::stringstream ss;
@@ -98,9 +103,13 @@ int main(int argc, char *argv[]){
 	//Loop with one Recognizer Pointer
 	shared_ptr<Loop> loopRecPointer = Foundation::loop();
 	shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();
+  recognizptrCar->setName("@rule");
 	shared_ptr<CharRecognizer> characterRecognizerPtr2 = Foundation::charRecognizer('a', false);
 	recognizptrCar->setPointed(characterRecognizerPtr2);
 	loopRecPointer->setRecognizer(recognizptrCar,0,3);
+  mRecognizerPointersLoaded.push_back(recognizptrCar);
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 	cout << "*********FEEDING THE ORIGINAL RECOGNIZERS*********" << endl;
 
@@ -121,6 +130,7 @@ int main(int argc, char *argv[]){
   if (loopRecPointer->feed(NULL, "a", 0) == 1)cout << "SUCESS : RecognizerPointer Loop feed successfull" << endl;
   else cout << "FAILED : RecognizerPointer Loop feed gone wrong" << endl;
 
+  remove("test-loop.bin");
 
 //SAVE AND LOAD
 	ofstream ofichier ("test-loop.bin", ios::out | ios::app);
@@ -141,13 +151,13 @@ int main(int argc, char *argv[]){
   std::vector<std::string> result = split(contenu, ' ');
   vector<string>::const_iterator i = result.begin();
 
-	const shared_ptr<Loop> loopCarLoaded = Loop::loadVect(i);
-	const shared_ptr<Loop> loopSelLoaded = Loop::loadVect(i);
-	const shared_ptr<Loop> loopExSelLoaded = Loop::loadVect(i);
-	const shared_ptr<Loop> loopSequenceLoaded = Loop::loadVect(i);
-	const shared_ptr<Loop> loopLiteralLoaded = Loop::loadVect(i);
-  const shared_ptr<Loop> loopCharRangeLoaded = Loop::loadVect(i);
-  const shared_ptr<Loop> loopRecPointerLoaded = Loop::loadVect(i);
+	const shared_ptr<Loop> loopCarLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Loop> loopSelLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Loop> loopExSelLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Loop> loopSequenceLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Loop> loopLiteralLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
+  const shared_ptr<Loop> loopCharRangeLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
+  const shared_ptr<Loop> loopRecPointerLoaded = Loop::loadVect(i, rcptrItBegin, rcptrItEnd);
 
 	ifichier.close();
 
