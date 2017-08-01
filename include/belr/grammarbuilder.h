@@ -1,23 +1,40 @@
+/*
+ * grammarbuilder.h
+ * Copyright (C) 2017  Belledonne Communications SARL
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef grammarbuilder_hh
-#define grammarbuilder_hh
+#ifndef _GRAMMARBUILDER_H_
+#define _GRAMMARBUILDER_H_
 
+#include "parser.h"
 
-#include "parser.hh"
-#include <vector>
+// =============================================================================
 
 namespace belr{
 class ABNFAlternation;
-	
+
 class ABNFBuilder{
 public:
-	virtual ~ABNFBuilder();
+	virtual ~ABNFBuilder() = default;
+
 	virtual std::shared_ptr<Recognizer> buildRecognizer(const std::shared_ptr<Grammar> &grammar)=0;
 };
 
 class ABNFRule : public ABNFBuilder{
 public:
-	ABNFRule();
 	static std::shared_ptr<ABNFRule> create();
 	void setName(const std::string &name);
 	void setDefinedAs(const std::string &defined_as);
@@ -44,7 +61,6 @@ private:
 
 class ABNFNumval : public ABNFBuilder{
 public:
-	ABNFNumval();
 	static std::shared_ptr<ABNFNumval> create();
 	std::shared_ptr<Recognizer> buildRecognizer(const std::shared_ptr<Grammar> &grammar);
 	void setDecVal(const std::string &decval);
@@ -53,12 +69,11 @@ public:
 private:
 	void parseValues(const std::string &val, int base);
 	std::vector<int> mValues;
-	bool mIsRange;
+	bool mIsRange = false;
 };
 
 class ABNFElement : public ABNFBuilder{
 public:
-	ABNFElement();
 	static std::shared_ptr<ABNFElement> create();
 	std::shared_ptr<Recognizer> buildRecognizer(const std::shared_ptr<Grammar> &grammar);
 	void setElement(const std::shared_ptr<ABNFBuilder> &e);
@@ -73,7 +88,6 @@ private:
 
 class ABNFGroup : public ABNFBuilder{
 public:
-	ABNFGroup();
 	static std::shared_ptr<ABNFGroup> create();
 	std::shared_ptr<Recognizer> buildRecognizer(const std::shared_ptr<Grammar> &grammar);
 	void setAlternation(const std::shared_ptr<ABNFAlternation> &a);
@@ -83,7 +97,6 @@ private:
 
 class ABNFRepetition : public ABNFBuilder{
 public:
-	ABNFRepetition();
 	static std::shared_ptr<ABNFRepetition> create();
 	void setRepeat(const std::string &r);
 	void setMin(int min);
@@ -92,14 +105,15 @@ public:
 	void setElement(const std::shared_ptr<ABNFElement> &e);
 	std::shared_ptr<Recognizer> buildRecognizer(const std::shared_ptr<Grammar> &grammar);
 private:
-	int mMin, mMax, mCount;
+	int mMin = 0;
+	int mMax = -1;
+	int mCount = -1;
 	std::string mRepeat;
 	std::shared_ptr<ABNFElement> mElement;
 };
 
 class ABNFOption : public ABNFBuilder{
 public:
-	ABNFOption();
 	static std::shared_ptr<ABNFOption> create();
 	void setAlternation(const std::shared_ptr<ABNFAlternation> &a);
 	std::shared_ptr<Recognizer> buildRecognizer(const std::shared_ptr<Grammar> &grammar);
@@ -143,9 +157,9 @@ public:
 	 * the protocol or language described in the grammar.
 	 * @param abnf the string that contains the abnf grammar.
 	 * @param grammar an optional grammar to include.
-	 * @return the Grammar object corresponding to the text definition loaded, NULL if an error occured.
+	 * @return the Grammar object corresponding to the text definition loaded, nullptr if an error occured.
 	**/
-	BELR_PUBLIC std::shared_ptr<Grammar> createFromAbnf(const std::string &abnf, const std::shared_ptr<Grammar> &grammar=NULL);
+	BELR_PUBLIC std::shared_ptr<Grammar> createFromAbnf(const std::string &abnf, const std::shared_ptr<Grammar> &grammar=nullptr);
 	/**
 	 * Create a grammar from an ABNF grammar defined in the text file pointed by path.
 	 * An optional Grammar argument corresponding to a grammar to include can be passed.
@@ -154,9 +168,9 @@ public:
 	 * the protocol or language described in the grammar.
 	 * @param path the path from where to load the abnf definition.
 	 * @param grammar an optional grammar to include.
-	 * @return the Grammar object corresponding to the text definition loaded, NULL if an error occured.
+	 * @return the Grammar object corresponding to the text definition loaded, nullptr if an error occured.
 	**/
-	BELR_PUBLIC std::shared_ptr<Grammar> createFromAbnfFile(const std::string &path, const std::shared_ptr<Grammar> &grammar=NULL);
+	BELR_PUBLIC std::shared_ptr<Grammar> createFromAbnfFile(const std::string &path, const std::shared_ptr<Grammar> &grammar=nullptr);
 private:
 	Parser<std::shared_ptr<ABNFBuilder>> mParser;
 };

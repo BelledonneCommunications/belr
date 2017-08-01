@@ -1,5 +1,24 @@
-#include "belr/belr.hh"
-#include "belr/parser.hh"
+/*
+ * belr.cpp
+ * Copyright (C) 2017  Belledonne Communications SARL
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "belr/parser.h"
+#include "belr/belr.h"
+
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -10,10 +29,11 @@
 #include <cstring>
 #include <string.h>
 
-
 using namespace std;
+
 using namespace belr;
 
+// =============================================================================
 
 
 TransitionMap::TransitionMap(){
@@ -42,11 +62,6 @@ void TransitionMap::merge(const TransitionMap* other){
 	for(size_t i=0;i<sizeof(mPossibleChars)/sizeof(bool);++i){
 		if (other->mPossibleChars[i]) mPossibleChars[i]=true;
 	}
-}
-
-
-
-Recognizer::Recognizer() : mId(0) {
 }
 
 void Recognizer::setName(const std::string& name){
@@ -95,7 +110,7 @@ bool Recognizer::_getTransitionMap(TransitionMap* mask){
 	input.resize(2,'\0');
 	for(int i=0;i<256;++i){
 		input[0]=i;
-		if (feed(NULL,input,0)==1)
+		if (feed(nullptr,input,0)==1)
 			mask->mPossibleChars[i]=true;
 	}
 	return true;
@@ -189,9 +204,6 @@ void CharRecognizer::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::
 	//nothing to do
 }
 
-Selector::Selector() : mIsExclusive(false){
-}
-
 shared_ptr<Selector> Selector::addRecognizer(const shared_ptr<Recognizer> &r){
 	mElements.push_back(r);
 	return static_pointer_cast<Selector> (shared_from_this());
@@ -247,7 +259,7 @@ void Selector::_optimize(int recursionLevel){
 	for (auto it=mElements.begin(); it!=mElements.end(); ++it){
 		(*it)->optimize(recursionLevel);
 	}
-	TransitionMap *all=NULL;
+	TransitionMap *all=nullptr;
 	bool intersectionFound=false;
 	for (auto it=mElements.begin(); it!=mElements.end() && !intersectionFound; ++it){
 		TransitionMap *cur=new TransitionMap();
@@ -466,9 +478,6 @@ void ExclusiveSelector::linkPointer(std::list<std::shared_ptr<RecognizerPointer>
 		(*it)->linkPointer(rcptrIterBegin, rcptrIterEnd);
 }
 
-Sequence::Sequence(){
-}
-
 shared_ptr<Sequence> Sequence::addRecognizer(const shared_ptr<Recognizer> &element){
 	mElements.push_back(element);
 	return static_pointer_cast<Sequence>( shared_from_this());
@@ -595,10 +604,6 @@ void Sequence::printtype(){
 void Sequence::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	for(std::list<std::shared_ptr<Recognizer>>::const_iterator it = mElements.begin() ;it!=mElements.end();it++)
 		(*it)->linkPointer(rcptrIterBegin, rcptrIterEnd);
-}
-
-Loop::Loop() : mMin(0), mMax(-1) {
-
 }
 
 shared_ptr<Loop> Loop::setRecognizer(const shared_ptr<Recognizer> &element, int min, int max){
@@ -877,9 +882,6 @@ shared_ptr<Recognizer> Utils::char_range(int begin, int end){
 	return make_shared<CharRange>(begin, end);
 }
 
-RecognizerPointer::RecognizerPointer() {
-}
-
 shared_ptr<Recognizer> RecognizerPointer::getPointed(){
 	return mRecognizer;
 }
@@ -989,7 +991,7 @@ Grammar::Grammar(const string& name) : mName(name){
 Grammar::~Grammar() {
 	for(auto it = mRecognizerPointers.begin(); it != mRecognizerPointers.end(); ++it) {
 		shared_ptr<RecognizerPointer> pointer = dynamic_pointer_cast<RecognizerPointer>(*it);
-		pointer->setPointed(NULL);
+		pointer->setPointed(nullptr);
 	}
 }
 
@@ -1034,7 +1036,7 @@ shared_ptr<Recognizer> Grammar::findRule(const string &argname){
 	if (it!=mRules.end()){
 		return (*it).second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 shared_ptr<Recognizer> Grammar::getRule(const string &argname){
