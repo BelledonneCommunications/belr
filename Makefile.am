@@ -10,4 +10,4 @@ EXTRA_DIST= \
 	belr.pc.in \
 	README.md
 
-SUBDIRS=src include tools
+SUBDIRS=src include tools tester

@@ -241,6 +241,7 @@ public:
 
 class RecognizerPointer :  public Recognizer{
 public:
+	RecognizerPointer();
 	std::shared_ptr<Recognizer> getPointed();
 	void setPointed(const std::shared_ptr<Recognizer> &r);
 	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
@@ -249,7 +250,6 @@ public:
 	//DEBUG FUNCTION
 	void printtype();
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
-
 
 private:
 	virtual void _optimize(int recursionLevel);

@@ -956,6 +956,9 @@ shared_ptr<RecognizerPointer> RecognizerPointer::loadVect(std::vector<string>::c
 	return recognpointer_reloaded;
 }
 
+RecognizerPointer::RecognizerPointer() {
+
+}
 
 bool RecognizerPointer::equal(const std::shared_ptr<Recognizer> &LOP){
 	bool condition = true;
