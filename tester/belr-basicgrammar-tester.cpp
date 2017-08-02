@@ -35,9 +35,10 @@ static void basicgrammar_save(void) {
   std::chrono::duration<double> elapsedFirst = finish - start;
 
   BC_ASSERT_FALSE(!grammar);
-  
+
   //Save grammar
   string grammarDump = bc_tester_file("grammarDump.bin");
+  remove(grammarDump.c_str());
   grammar->createGrammarDump(grammarDump);
 
   //Load grammar

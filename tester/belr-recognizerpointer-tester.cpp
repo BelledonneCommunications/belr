@@ -47,13 +47,13 @@
 
       ofstream ofichier ("test-recp.bin", ios::out | ios::app);
   	  recognizptr->save(ofichier, savePosition);
-
+      ofichier.close();
       ifstream ifichier ("test-recp.bin", ios::in);
       string content;
       getline(ifichier, content);
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
-
+      ifichier.close();
       const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
 
@@ -97,12 +97,14 @@
 
         ofstream ofichier ("test-recp.bin", ios::out | ios::app);
     	  recognizptr->save(ofichier, savePosition);
+        ofichier.close();
 
         ifstream ifichier ("test-recp.bin", ios::in);
         string content;
         getline(ifichier, content);
         std::vector<std::string> result = split(content, ' ');
         vector<string>::const_iterator i = result.begin();
+        ifichier.close();
 
         const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
         remove("test-recp.bin");
@@ -148,12 +150,14 @@
 
       ofstream ofichier ("test-recp.bin", ios::out | ios::app);
       recognizptr->save(ofichier, savePosition);
+      ofichier.close();
 
       ifstream ifichier ("test-recp.bin", ios::in);
       string content;
       getline(ifichier, content);
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
+      ifichier.close();
 
       const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
@@ -192,12 +196,14 @@ static void loop_recognizerpointer(void) {
 
       ofstream ofichier ("test-recp.bin", ios::out | ios::app);
       recognizptr->save(ofichier, savePosition);
+      ofichier.close();
 
       ifstream ifichier ("test-recp.bin", ios::in);
       string content;
       getline(ifichier, content);
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
+      ifichier.close();
 
       const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
@@ -239,12 +245,14 @@ static void sequence_recognizerpointer(void) {
 
           ofstream ofichier ("test-recp.bin", ios::out | ios::app);
           recognizptr->save(ofichier, savePosition);
+          ofichier.close();
 
           ifstream ifichier ("test-recp.bin", ios::in);
           string content;
           getline(ifichier, content);
           std::vector<std::string> result = split(content, ' ');
           vector<string>::const_iterator i = result.begin();
+          ifichier.close();
 
           const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
           remove("test-recp.bin");
@@ -277,12 +285,14 @@ static void sequence_recognizerpointer(void) {
 
           ofstream ofichier ("test-recp.bin", ios::out | ios::app);
           recognizptr->save(ofichier, savePosition);
+          ofichier.close();
 
           ifstream ifichier ("test-recp.bin", ios::in);
           string content;
           getline(ifichier, content);
           std::vector<std::string> result = split(content, ' ');
           vector<string>::const_iterator i = result.begin();
+          ifichier.close();
 
           const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
           remove("test-recp.bin");
@@ -314,12 +324,14 @@ static void xchar_recognizerpointer(void) {
 
       ofstream ofichier ("test-recp.bin", ios::out | ios::app);
       recognizptr->save(ofichier, savePosition);
+      ofichier.close();
 
       ifstream ifichier ("test-recp.bin", ios::in);
       string content;
       getline(ifichier, content);
       std::vector<std::string> result = split(content, ' ');
       vector<string>::const_iterator i = result.begin();
+      ifichier.close();
 
       const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
       remove("test-recp.bin");
@@ -357,6 +369,7 @@ static void recp_recognizerpointer(void) {
 
     ofstream ofichier ("test-recp.bin", ios::out | ios::app);
     recognizptr->save(ofichier, savePosition);
+    ofichier.close();
 
     ifstream ifichier ("test-recp.bin", ios::in);
     string content;
@@ -365,6 +378,8 @@ static void recp_recognizerpointer(void) {
     vector<string>::const_iterator i = result.begin();
     const shared_ptr<RecognizerPointer> recognizptrLoaded = RecognizerPointer::loadVect(i, rcptrItBegin, rcptrItEnd);
     remove("test-recp.bin");
+    ifichier.close();
+
 
     BC_ASSERT_TRUE(recognizptr->equal(recognizptrLoaded));
 
