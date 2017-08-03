@@ -21,10 +21,25 @@
 using namespace::std;
 using namespace::belr;
 
+static string openFile(const char *name) {
+	ifstream istr(name, std::ios::binary);
+	if (!istr.is_open()) {
+		BC_FAIL(name);
+	}
+
+	stringstream vcardStream;
+	vcardStream << istr.rdbuf();
+	string vcard = vcardStream.str();
+	return vcard;
+}
 
 static void basicgrammar_save(void) {
 
   string grammarToParse = bc_tester_res("grammars/basicgrammar.txt");
+  string grammarDump = bc_tester_file("grammarDump.bin");
+  string grammarDump2 = bc_tester_file("grammarDump2.bin");
+  remove(grammarDump.c_str());
+  remove(grammarDump2.c_str());
 
   ABNFGrammarBuilder builder;
 
@@ -37,8 +52,6 @@ static void basicgrammar_save(void) {
   BC_ASSERT_FALSE(!grammar);
 
   //Save grammar
-  string grammarDump = bc_tester_file("grammarDump.bin");
-  remove(grammarDump.c_str());
   grammar->createGrammarDump(grammarDump);
 
   //Load grammar
@@ -47,9 +60,12 @@ static void basicgrammar_save(void) {
   finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsedSecond = finish - start;
 
-  remove(grammarDump.c_str());
-
   BC_ASSERT_FALSE(!loadedGram);
+
+  loadedGram->createGrammarDump(grammarDump2);
+  string g1 = openFile(grammarDump.c_str());
+  string g2 = openFile(grammarDump2.c_str());
+  BC_ASSERT_STRING_EQUAL(g1.c_str(), g2.c_str());
 
   BC_ASSERT_TRUE(grammar->equal(loadedGram));
 

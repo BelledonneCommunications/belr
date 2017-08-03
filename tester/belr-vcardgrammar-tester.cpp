@@ -21,10 +21,24 @@
 using namespace::std;
 using namespace::belr;
 
+static string openFile(const char *name) {
+	ifstream istr(name, std::ios::binary);
+	if (!istr.is_open()) {
+		BC_FAIL(name);
+	}
+
+	stringstream vcardStream;
+	vcardStream << istr.rdbuf();
+	string vcard = vcardStream.str();
+	return vcard;
+}
 
 static void vcardgrammar_save(void) {
-
   string grammarToParse = bc_tester_res("grammars/vcardgrammar.txt");
+  string grammarDump = bc_tester_file("grammarDump.bin");
+  string grammarDump2 = bc_tester_file("grammarDump2.bin");
+  remove(grammarDump.c_str());
+  remove(grammarDump2.c_str());
 
   ABNFGrammarBuilder builder;
 
@@ -37,7 +51,6 @@ static void vcardgrammar_save(void) {
   BC_ASSERT_FALSE(!grammar);
 
   //Save grammar
-  string grammarDump = bc_tester_file("grammarDump.bin");
 
   grammar->createGrammarDump(grammarDump);
 
@@ -49,8 +62,10 @@ static void vcardgrammar_save(void) {
 
   BC_ASSERT_FALSE(!loadedGram);
 
-  remove(grammarDump.c_str());
-
+  loadedGram->createGrammarDump(grammarDump2);
+  string g1 = openFile(grammarDump.c_str());
+  string g2 = openFile(grammarDump2.c_str());
+  BC_ASSERT_STRING_EQUAL(g1.c_str(), g2.c_str());
 
   BC_ASSERT_TRUE(grammar->equal(loadedGram));
 
