@@ -25,6 +25,8 @@ using namespace::belr;
 static void sipgrammar_save(void) {
 
   string grammarToParse = bc_tester_res("grammars/sipgrammar.txt");
+  string grammarDump = bc_tester_file("grammarDump.bin");
+  remove(grammarDump.c_str());
 
   ABNFGrammarBuilder builder;
 
@@ -37,7 +39,6 @@ static void sipgrammar_save(void) {
   BC_ASSERT_FALSE(!grammar);
 
   //Save grammar
-  string grammarDump = bc_tester_file("grammarDump.bin");
 
   grammar->createGrammarDump(grammarDump);
 
