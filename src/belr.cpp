@@ -1313,7 +1313,7 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	bool condition = true;
 	//compare names
 
-	cout << "DEBUG comparing two names :<" << mName << "> vs <" << gramCompared->mName << ">"<<endl
+	cout << "DEBUG comparing two names :<" << mName << "> vs <" << gramCompared->mName << ">"<<endl;
 
 	if(mName != gramCompared->mName){condition = false;}
 
