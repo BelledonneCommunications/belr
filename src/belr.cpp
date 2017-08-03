@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#include <bctoolbox/logging.h>
 #include "belr/parser.h"
 #include "belr/belr.h"
 
@@ -1296,6 +1298,14 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 		}
 
   }
+	bctbx_message("[belr] Succesfully created grammar with %i rules.", retGram->getNumRules());
+	if (retGram->isComplete()){
+		bctbx_message("[belr] Grammar is complete.");
+		retGram->optimize();
+		bctbx_message("[belr] Grammar has been optimized.");
+	}else{
+		bctbx_warning("[belr] Grammar is not complete.");
+	}
   return retGram;
 }
 
@@ -1324,11 +1334,11 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	while (it != mRules.end() && condition){
 		if(it->first == itComp->first){
 			if(!(it->second)->equal(itComp->second)){
-				condition = false;
+				return false;
 			}
 		}
 		else{
-			condition = false;
+			return false;
 		}
 		it++;
 		itComp++;
@@ -1342,11 +1352,11 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 		string secondRule = (*itRcpComp)->getName();
 		if (!firstRule.compare(secondRule)){
 			if (!((*itRcp)->getPointed())->equal((*itRcpComp)->getPointed())){
-				condition = false;
+				return false;
 			}
 		}
 		else
-			condition = false;
+			return false;
 		//count the number of rules and check if equal
 		itRcp++;
 		itRcpComp++;
@@ -1356,23 +1366,15 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	int i =0;
 	while (itRcp!=mRecognizerPointers.end()){
 		//				if(!(*itRcp)->getPointed()) cout << (*itRcp)->getName() << " RULE UNDEFINERD" << endl;
-		if (itRcpComp == gramCompared->mRecognizerPointers.end()) condition = false;
+		if (itRcpComp == gramCompared->mRecognizerPointers.end()) return false;
 			itRcpComp++;
 			itRcp++;
 			i++;
 	}
 
 	//count the number of rules and check if equal between two grammars
-	itComp = gramCompared->mRules.begin();
-	it = mRules.begin();
-	int j = 0;
-	while (it!=mRules.end()){
-		if (itComp == gramCompared->mRules.end()) condition = false;
-			it++;
-			itComp++;
-			j++;
-		}
-	return condition;
+	if (mRules.size() != gramCompared->mRules.size()) return false;
+	return true;
 }
 
 void Grammar::debugGrammar(){
