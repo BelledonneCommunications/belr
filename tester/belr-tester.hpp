@@ -20,9 +20,9 @@
 #define belr_tester_hpp
 
 #include <bctoolbox/tester.h>
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
-#include "belr/belr.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
+#include "belr/belr.h"
 
 
 #include <chrono>
