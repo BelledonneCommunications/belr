@@ -1290,8 +1290,8 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			else if(tempTag == "LOOP"){tempValue = Loop::loadVect(it, rcptrItBegin, rcptrItEnd);}
 			else if(tempTag == "LIT"){tempValue = Literal::loadVect(it);}
 			else if(tempTag == "RECP") { tempValue = RecognizerPointer::loadVect(it, rcptrItBegin, rcptrItEnd);}
-
-			retGram->assignRule(tempKey, tempValue);
+			retGram->mRules[tempKey] = tempValue;
+			//retGram->assignRule(tempKey, tempValue);
 			++fileIter;
 		}
 
@@ -1312,7 +1312,11 @@ void Grammar::createGrammarDump(string dumpFileName){
 bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	bool condition = true;
 	//compare names
+
+	cout << "DEBUG comparing two names :<" << mName << "> vs <" << gramCompared->mName << ">"<<endl
+
 	if(mName != gramCompared->mName){condition = false;}
+
 
 	//compare rules
 	map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin();
