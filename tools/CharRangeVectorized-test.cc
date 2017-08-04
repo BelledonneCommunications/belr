@@ -1,6 +1,6 @@
 
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>

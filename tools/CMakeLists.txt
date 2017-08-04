@@ -26,7 +26,7 @@ else()
 	set(BELR_LIBRARIES_FOR_TOOLS belr-static)
 endif()
 
-foreach(EXECTUABLE belr-parse CharRecognizerVectorized-test SelectorVectorized-test Selector-test SequenceVectorized-test Sequence-test ExclusiveSelectorVectorized-test ExclusiveSelector-test CharRecognizer-test LoopVectorized-test Loop-test CharRangeVectorized-test CharRange-test RecognizerPointerVectorized-test RecognizerPointer-test LiteralVectorized-test Literal-test BasicGrammar-test GrammarDump-test exploreGrammar)
+foreach(EXECTUABLE belr-parse RecognizerPointerVectorized-test GrammarDumpParse-test SelectorVectorized-test SequenceVectorized-test LoopVectorized-test ExclusiveSelectorVectorized-test LiteralVectorized-test CharRangeVectorized-test GrammarDump-test exploreGrammar)
 	set(SOURCE_FILES_CXX ${EXECTUABLE}.cc)
 	bc_apply_compile_flags(SOURCE_FILES_CXX STRICT_OPTIONS_CPP STRICT_OPTIONS_CXX)
 	add_executable(${EXECTUABLE} ${SOURCE_FILES_CXX})
@@ -45,3 +45,9 @@ if(NOT IOS)
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 	)
 endif()
+
+add_custom_command(
+        TARGET GrammarDump-test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/tools/grammars/*.txt
+                ${CMAKE_CURRENT_BINARY_DIR}/grammars/)

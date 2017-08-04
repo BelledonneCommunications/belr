@@ -24,7 +24,7 @@ using namespace::belr;
 
 static void vcardgrammar_save(void) {
 
-  string grammarToParse = "recognizers_grammars/vcardgrammar.txt";
+  string grammarToParse = bc_tester_res("grammars/vcardgrammar.txt");
 
   ABNFGrammarBuilder builder;
 
@@ -37,17 +37,19 @@ static void vcardgrammar_save(void) {
   BC_ASSERT_FALSE(!grammar);
 
   //Save grammar
-  grammar->createGrammarDump("grammarDump.bin");
+  string grammarDump = bc_tester_file("grammarDump.bin");
+
+  grammar->createGrammarDump(grammarDump);
 
   //Load grammar
   start = std::chrono::high_resolution_clock::now();
-  shared_ptr<Grammar> loadedGram = Grammar::loadVectRulesMap("grammarDump.bin");
+  shared_ptr<Grammar> loadedGram = Grammar::loadVectRulesMap(grammarDump);
   finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsedSecond = finish - start;
 
   BC_ASSERT_FALSE(!loadedGram);
 
-  remove("grammarDump.bin");
+  remove(grammarDump.c_str());
 
 
   BC_ASSERT_TRUE(grammar->equal(loadedGram));

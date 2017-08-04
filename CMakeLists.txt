@@ -21,7 +21,7 @@
 ############################################################################
 
 cmake_minimum_required(VERSION 3.0)
-project(BELR VERSION 0.1.2 LANGUAGES C CXX)
+project(BELR VERSION 0.1.3 LANGUAGES C CXX)
 
 set(BELR_SO_VERSION "1")
 
@@ -50,10 +50,8 @@ if(LINPHONE_BUILDER_GROUP_EXTERNAL_SOURCE_PATH_BUILDERS)
 	set(BcToolbox_FIND_COMPONENTS tester)
 	include("${EP_bctoolbox_CONFIG_DIR}/BcToolboxConfig.cmake")
 else()
-	find_package(BcToolbox 0.0.3 REQUIRED OPTIONAL_COMPONENTS tester)# ligne a verifier
+	find_package(BcToolbox 0.0.3 REQUIRED OPTIONAL_COMPONENTS tester) #DAMN POSTIVE
 endif()
-
-
 
 if(UNIX AND NOT APPLE)
 	include(CheckIncludeFiles)
@@ -81,7 +79,7 @@ else()
 	list(APPEND STRICT_OPTIONS_CPP "-Wall" "-Wuninitialized" "-Wno-error=deprecated-declarations")
 	list(APPEND STRICT_OPTIONS_C "-Wdeclaration-after-statement" "-Wstrict-prototypes" "-Wno-error=strict-prototypes")
 	list(APPEND STRICT_OPTIONS_CXX "-std=c++11")
-	if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	if(CMAKE_C_COMPILER_ID MATCHES "Clang")
 		list(APPEND STRICT_OPTIONS_CPP "-Qunused-arguments" "-Wno-array-bounds")
 	endif()
 	if(APPLE)
@@ -142,15 +140,4 @@ install(FILES
 	DESTINATION ${ConfigPackageLocation}
 )
 
-
-# CPack settings
-set(CPACK_PACKAGE_NAME "belr")
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_SOURCE_GENERATOR "TGZ")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-set(CPACK_SOURCE_IGNORE_FILES
-        "^${CMAKE_BINARY_DIR}"
-        "/\\\\..+"
-)
-
-include(CPack)
+add_subdirectory(build)

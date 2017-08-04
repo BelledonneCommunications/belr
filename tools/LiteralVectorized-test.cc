@@ -1,6 +1,6 @@
 
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -51,6 +51,7 @@ const shared_ptr<Literal> chaine = dynamic_pointer_cast<Literal>(Utils::literal(
     cout << "FAILED : Literal feed gone wrong" << endl;
   }
 
+  remove("test-lit.bin");
 
 
 //SAVE AND LOAD

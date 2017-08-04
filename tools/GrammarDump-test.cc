@@ -1,5 +1,5 @@
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -7,8 +7,6 @@
 #include <ctime>
 #include <cstring>
 
-
-#include "belr/parser-impl.cc" //this file is to be included only in the file where the parser is instanciated, for template instanciation.
 
 using namespace::belr;
 using namespace::std;
@@ -38,11 +36,17 @@ int main(int argc, char *argv[]){
   return -1;
   }
 
+
+//  cout << "************DEBUG original grammar*******************"<< endl;
+  //grammar->debugGrammar();
+//  cout << "************DONE DEBUG original grammar*******************"<< endl;
+
   if(remove("grammarDump.bin")){cerr << "Problem removing previous dump" << endl;}
   //Save grammar
   grammar->createGrammarDump("grammarDump.bin");
 
   cout << "DEBUG : grammar dump created no seg fault yet" << endl;
+
 
   //Load grammar
   start = std::chrono::high_resolution_clock::now();
@@ -51,7 +55,8 @@ int main(int argc, char *argv[]){
   std::chrono::duration<double> elapsedSecond = finish - start;
 
   cout << "DEBUG : grammar dump loaded no seg fault yet" << endl;
-
+  //cout << "************DEBUG loaded grammar*******************"<< endl;
+  //loadedGram->debugGrammar();
   //Verification and output of the results (Match , indvidual parsing time and optimisation ratio)
   bool isItOk = false;
   isItOk = grammar->equal(loadedGram);
@@ -59,9 +64,10 @@ int main(int argc, char *argv[]){
   cout << "Grammars loaded ,compare result : " << isItAMatch << endl;
   cout << "Elapsed time for initial parsing :" << elapsedFirst.count() << " VS second parsing :" << elapsedSecond.count() << endl;
   cout << "Optimisation ratio : " << (elapsedFirst.count() / elapsedSecond.count())*100 << "%"<< endl;
-//  cout << "*********************ORIGINAL GRAMMAR BUMP******************" << endl;
-//  grammar->debugGrammar();
-//  cout << "*********************LOADED GRAMMAR BUMP******************" << endl;
-//  loadedGram->debugGrammar();
-
+/*
+  cout << "*********************ORIGINAL GRAMMAR BUMP******************" << endl;
+  grammar->debugGrammar();
+  cout << "*********************LOADED GRAMMAR BUMP******************" << endl;
+  loadedGram->debugGrammar();
+*/
 }

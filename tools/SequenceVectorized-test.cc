@@ -1,6 +1,6 @@
 
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -17,6 +17,10 @@ using namespace std;
 
 long savePosition = 0;
 long loadPosition = 0;
+
+std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
 
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
@@ -94,9 +98,13 @@ int main(int argc, char *argv[]){
 //Sequence with a RecognizerPointer
 	shared_ptr<Sequence> sequence7 = Foundation::sequence();
 	shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();
+  recognizptrCar->setName("@rule");
 	shared_ptr<CharRecognizer> characterRecognizerPtr2 = Foundation::charRecognizer('a', false);
 	recognizptrCar->setPointed(characterRecognizerPtr2);
 	sequence7->addRecognizer(recognizptrCar);
+  mRecognizerPointersLoaded.push_back(recognizptrCar);
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 	cout << "*********FEEDING THE ORIGINAL RECOGNIZERS*********" << endl;
 
@@ -119,6 +127,7 @@ int main(int argc, char *argv[]){
 	else cout << "FAILED : RecognizerPointer Sequence feed gone wrong" << endl;
 
 
+  remove("test-seq.bin");
 
 
 
@@ -140,13 +149,13 @@ int main(int argc, char *argv[]){
 
   std::vector<std::string> result = split(contenu, ' ');
   vector<string>::const_iterator i = result.begin();
-	const shared_ptr<Sequence> sequenceLoaded1 = Sequence::loadVect(i);
-	const shared_ptr<Sequence> sequenceLoaded2 = Sequence::loadVect(i);
-	const shared_ptr<Sequence> sequenceLoaded3 = Sequence::loadVect(i);
-	const shared_ptr<Sequence> sequenceLoaded4 = Sequence::loadVect(i);
-	const shared_ptr<Sequence> sequenceLoaded5 = Sequence::loadVect(i);
-	const shared_ptr<Sequence> sequenceLoaded6 = Sequence::loadVect(i);
-	const shared_ptr<Sequence> sequenceLoaded7 = Sequence::loadVect(i);
+	const shared_ptr<Sequence> sequenceLoaded1 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Sequence> sequenceLoaded2 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Sequence> sequenceLoaded3 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Sequence> sequenceLoaded4 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Sequence> sequenceLoaded5 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Sequence> sequenceLoaded6 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
+	const shared_ptr<Sequence> sequenceLoaded7 = Sequence::loadVect(i, rcptrItBegin, rcptrItEnd);
 
 	ifichier.close();
 

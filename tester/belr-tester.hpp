@@ -20,15 +20,13 @@
 #define belr_tester_hpp
 
 #include <bctoolbox/tester.h>
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
-#include "belr/belr.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
+#include "belr/belr.h"
 
-//#include "belr/src/belr.hh"
 
 
 #include <fstream>
-//#include <iostream>
 #include <string>
 #include <memory>
 #include <sstream>
@@ -51,7 +49,9 @@ extern test_suite_t recognizer_literal_test_suite;
 extern test_suite_t recognizer_recognizerpointer_test_suite;
 extern test_suite_t grammar_simple_test_suite;
 extern test_suite_t grammar_vcardgrammar_suite;
-//extern test_suite_t vcard_test_suite;
+extern test_suite_t grammar_sipgrammar_suite;
+
+
 
 void belr_tester_init(void(*ftester_printf)(int level, const char *fmt, va_list args));
 void belr_tester_uninit(void);

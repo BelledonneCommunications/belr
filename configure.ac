@@ -54,6 +54,19 @@ fi
 
 AC_SUBST(BCTOOLBOX_LIBS)
 
+PKG_CHECK_MODULES(BCTOOLBOX, [bctoolbox-tester],[libbctoolbox_tester_found=yes],foo=bar)
+if test "$libbctoolbox_tester_found" != "yes" ; then
+        dnl Check the lib presence in case the PKG-CONFIG version is not found
+        AC_LANG_CPLUSPLUS
+        AC_CHECK_LIB(bctoolbox-tester, main, [BCTOOLBOXTESTER_LIBS+=" -lbctoolbox-tester"; libbctoolbox_tester_found=yes], [foo=bar])
+        AC_LANG_C
+fi
+if test "$libbctoolbox_tester_found" != "yes" ; then
+        AC_MSG_ERROR([libbctoolbox-tester not found. Install it and try again])
+fi
+
+AC_SUBST(BCTOOLBOXTESTER_LIBS)
+
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -82,6 +95,7 @@ AC_CONFIG_FILES(
 Makefile
 src/Makefile
 tools/Makefile
+tester/Makefile
 include/Makefile
 include/belr/Makefile
 belr.pc

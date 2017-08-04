@@ -27,13 +27,13 @@ else()
 endif()
 
 set(GRAMMAR_FILES
-#LES GRAMMAIRES A INSERER ICI
-#	grammars/.....
+	grammars/basicgrammar.txt
+	grammars/vcardgrammar.txt
+	grammars/sipgrammar.txt
 )
 
 set(HEADER_FILES_CXX belr-tester.hpp)
 set(SOURCE_FILES_CXX
-#LES TESTEURS UNITAIRES ICI
 	belr-tester.cpp
 	belr-charrecognizer-tester.cpp
 	belr-selector-tester.cpp
@@ -45,7 +45,7 @@ set(SOURCE_FILES_CXX
 	belr-recognizerpointer-tester.cpp
 	belr-basicgrammar-tester.cpp
 	belr-vcardgrammar-tester.cpp
-
+	belr-sipgrammar-tester.cpp
 )
 
 bc_apply_compile_flags(SOURCE_FILES_CXX STRICT_OPTIONS_CPP STRICT_OPTIONS_CXX)

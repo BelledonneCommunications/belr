@@ -1,6 +1,6 @@
 
-#include "belr/grammarbuilder.hh"
-#include "belr/abnf.hh"
+#include "belr/grammarbuilder.h"
+#include "belr/abnf.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -17,6 +17,11 @@ using namespace std;
 
 long savePosition = 0;
 long loadPosition = 0;
+
+std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
+std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+
 
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
@@ -97,9 +102,15 @@ int main(int argc, char *argv[]){
 	//Selector with a RecognizerPointer
 	shared_ptr<Selector> selector7 = Foundation::selector(true);
 	shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();
+  recognizptrCar->setName("@rule");
 	shared_ptr<CharRecognizer> characterRecognizerPtr2 = Foundation::charRecognizer('a', false);
 	recognizptrCar->setPointed(characterRecognizerPtr2);
 	selector7->addRecognizer(recognizptrCar);
+
+  mRecognizerPointersLoaded.push_back(recognizptrCar);
+  rcptrItEnd = (mRecognizerPointersLoaded.end());
+  rcptrItBegin = (mRecognizerPointersLoaded.begin());
+
 
 
 	//verification avec feed
@@ -119,6 +130,7 @@ int main(int argc, char *argv[]){
 		if (selector7->feed(NULL, "a", 0) == 1)cout << "SUCESS : RecognizerPointer Selector feed successfull" << endl;
 		else cout << "FAILED : RecognizerPointer feed gone wrong" << endl;
 
+    remove("test-exsel.bin");
 
 
 	  //SAVE AND LOAD
@@ -139,13 +151,13 @@ int main(int argc, char *argv[]){
     std::vector<std::string> result = split(contenu, ' ');
     vector<string>::const_iterator i = result.begin();
 
-		const shared_ptr<Selector> selectorLoaded1 = ExclusiveSelector::loadVect(i);
-		const shared_ptr<Selector> selectorLoaded2 = ExclusiveSelector::loadVect(i);
-		const shared_ptr<Selector> selectorLoaded3 = ExclusiveSelector::loadVect(i);
-		const shared_ptr<Selector> selectorLoaded4 = ExclusiveSelector::loadVect(i);
-		const shared_ptr<Selector> selectorLoaded5 = ExclusiveSelector::loadVect(i);
-		const shared_ptr<Selector> selectorLoaded6 = ExclusiveSelector::loadVect(i);
-		const shared_ptr<Selector> selectorLoaded7 = ExclusiveSelector::loadVect(i);
+		const shared_ptr<Selector> selectorLoaded1 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
+		const shared_ptr<Selector> selectorLoaded2 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
+		const shared_ptr<Selector> selectorLoaded3 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
+		const shared_ptr<Selector> selectorLoaded4 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
+		const shared_ptr<Selector> selectorLoaded5 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
+		const shared_ptr<Selector> selectorLoaded6 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
+		const shared_ptr<Selector> selectorLoaded7 = ExclusiveSelector::loadVect(i, rcptrItBegin, rcptrItEnd);
 
 		ifichier.close();
 
