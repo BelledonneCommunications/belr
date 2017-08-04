@@ -323,7 +323,8 @@ shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inI
 	if(*inIter == "SEL"){
 		bool mIsExclusive_loaded = stoi(*(++inIter));
 		int recognizerListSize = stoi(*(++inIter));
-		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
+		selector_reloaded = Foundation::selector(0);
+		selector_reloaded->mIsExclusive = mIsExclusive_loaded;
 
 		string insideTAG = *(++inIter);
 		for(int i=0; i<recognizerListSize; i++){
