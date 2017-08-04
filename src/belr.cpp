@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#include <bctoolbox/logging.h>
 #include "belr/parser.h"
 #include "belr/belr.h"
 
@@ -1297,12 +1299,21 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			else if(tempTag == "LOOP"){tempValue = Loop::loadVect(it, rcptrItBegin, rcptrItEnd);}
 			else if(tempTag == "LIT"){tempValue = Literal::loadVect(it);}
 			else if(tempTag == "RECP") { tempValue = RecognizerPointer::loadVect(it, rcptrItBegin, rcptrItEnd);}
-			//retGram->assignRule(tempKey, tempValue);
+
 			retGram->mRules[tempKey] = tempValue;
+			//retGram->assignRule(tempKey, tempValue);
 			++fileIter;
 		}
 
   }
+	bctbx_message("[belr] Succesfully created grammar with %i rules.", retGram->getNumRules());
+	if (retGram->isComplete()){
+		bctbx_message("[belr] Grammar is complete.");
+		retGram->optimize();
+		bctbx_message("[belr] Grammar has been optimized.");
+	}else{
+		bctbx_warning("[belr] Grammar is not complete.");
+	}
   return retGram;
 }
 
@@ -1315,13 +1326,13 @@ void Grammar::createGrammarDump(string dumpFileName){
 	outFile.close();
 }
 
-
 bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	bool condition = true;
 	//compare names
 	if(mName != gramCompared->mName){condition = false;}
 	cout << "DEBUG comparing two names :<" << mName << "> vs <" << gramCompared->mName << ">"<<endl;
 	cout << "NAMES MATCH <" << condition << ">"<<endl;
+
 
 	//compare rules
 	map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin();
@@ -1351,11 +1362,11 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 		string secondRule = (*itRcpComp)->getName();
 		if (!firstRule.compare(secondRule)){
 			if (!((*itRcp)->getPointed())->equal((*itRcpComp)->getPointed())){
-				condition = false;
+				return false;
 			}
 		}
 		else
-			condition = false;
+			return false;
 		//count the number of rules and check if equal
 		itRcp++;
 		itRcpComp++;
@@ -1368,7 +1379,7 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	int i =0;
 	while (itRcp!=mRecognizerPointers.end()){
 		//				if(!(*itRcp)->getPointed()) cout << (*itRcp)->getName() << " RULE UNDEFINERD" << endl;
-		if (itRcpComp == gramCompared->mRecognizerPointers.end()) condition = false;
+		if (itRcpComp == gramCompared->mRecognizerPointers.end()) return false;
 			itRcpComp++;
 			itRcp++;
 			i++;
@@ -1387,6 +1398,7 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 		}
 		cout << "RULES NUMBER MATCH <" << condition << ">"<<endl;
 	return condition;
+
 }
 
 void Grammar::debugGrammar(){
