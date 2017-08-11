@@ -36,11 +36,6 @@ int main(int argc, char *argv[]){
   return -1;
   }
 
-
-//  cout << "************DEBUG original grammar*******************"<< endl;
-  //grammar->debugGrammar();
-//  cout << "************DONE DEBUG original grammar*******************"<< endl;
-
   if(remove("grammarDump.bin")){cerr << "Problem removing previous dump" << endl;}
   //Save grammar
   grammar->createGrammarDump("grammarDump.bin");
@@ -55,8 +50,6 @@ int main(int argc, char *argv[]){
   std::chrono::duration<double> elapsedSecond = finish - start;
 
   cout << "DEBUG : grammar dump loaded no seg fault yet" << endl;
-  //cout << "************DEBUG loaded grammar*******************"<< endl;
-  //loadedGram->debugGrammar();
   //Verification and output of the results (Match , indvidual parsing time and optimisation ratio)
   bool isItOk = false;
   isItOk = grammar->equal(loadedGram);
@@ -64,10 +57,5 @@ int main(int argc, char *argv[]){
   cout << "Grammars loaded ,compare result : " << isItAMatch << endl;
   cout << "Elapsed time for initial parsing :" << elapsedFirst.count() << " VS second parsing :" << elapsedSecond.count() << endl;
   cout << "Optimisation ratio : " << (elapsedFirst.count() / elapsedSecond.count())*100 << "%"<< endl;
-/*
-  cout << "*********************ORIGINAL GRAMMAR BUMP******************" << endl;
-  grammar->debugGrammar();
-  cout << "*********************LOADED GRAMMAR BUMP******************" << endl;
-  loadedGram->debugGrammar();
-*/
+
 }

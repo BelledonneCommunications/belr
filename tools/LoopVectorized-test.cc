@@ -18,9 +18,9 @@ using namespace std;
 long savePosition = 0;
 long loadPosition = 0;
 
-std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
 template<typename Out>
@@ -164,20 +164,20 @@ int main(int argc, char *argv[]){
 	cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
 
-		if(loopCar->equal(loopCarLoaded)) cout << "SUCESS : Character Loop matches loaded" << endl;
+		if(*loopCar.get() == *loopCarLoaded.get()) cout << "SUCESS : Character Loop matches loaded" << endl;
   	else cout << "FAILED : first character doesnt match loaded" << endl;
-	  if(loopSel->equal(loopSelLoaded)) cout << "SUCESS :  Selector Loop matches loaded" << endl;
+	  if(*loopSel.get() == *loopSelLoaded.get()) cout << "SUCESS :  Selector Loop matches loaded" << endl;
 		else cout << "FAILED : first character doesnt match loaded" << endl;
-		if(loopExSel->equal(loopExSelLoaded)) cout << "SUCESS : ExclusiveSelector Loop matches loaded" << endl;
+		if(*loopExSel.get() == *loopExSelLoaded.get()) cout << "SUCESS : ExclusiveSelector Loop matches loaded" << endl;
 		else cout << "FAILED : first character doesnt match loaded" << endl;
     //cout << " no seg fault in exsel test" << endl;
-		if(loopCharRange->equal(loopCharRangeLoaded)) cout << "SUCESS : CharRange Loop matches loaded" << endl;
+		if(*loopCharRange.get() == *loopCharRangeLoaded.get()) cout << "SUCESS : CharRange Loop matches loaded" << endl;
 		else cout << "FAILED : first character doesnt match loaded" << endl;
-		if(loopSequence->equal(loopSequenceLoaded)) cout << "SUCESS : Sequence Loop matches loaded" << endl;
+		if(*loopSequence.get() == *loopSequenceLoaded.get()) cout << "SUCESS : Sequence Loop matches loaded" << endl;
 		else cout << "FAILED : first character doesnt match loaded" << endl;
-		if(loopLiteral->equal(loopLiteralLoaded)) cout << "SUCESS : Literal Loop matches loaded" << endl;
+		if(*loopLiteral.get() == *loopLiteralLoaded.get()) cout << "SUCESS : Literal Loop matches loaded" << endl;
 		else cout << "FAILED : first character doesnt match loaded" << endl;
-		if(loopRecPointer->equal(loopRecPointerLoaded)) cout << "SUCESS : Recognizer Pointer Loop matches loaded" << endl;
+		if(*loopRecPointer.get() == *loopRecPointerLoaded.get()) cout << "SUCESS : Recognizer Pointer Loop matches loaded" << endl;
 		else cout << "FAILED : Recognizer Pointer Loop doesnt match loaded" << endl;
 
 
@@ -197,7 +197,6 @@ int main(int argc, char *argv[]){
     else cout << "FAILED : Sequence Loop feed gone wrong" << endl;
     if (loopLiteralLoaded->feed(NULL, "abcd", 0) == 4)cout << "SUCESS : Literal Loop feed successfull" << endl;
     else cout << "FAILED : Literal Loop feed gone wrong" << endl;
-    cout << loopRecPointerLoaded->feed(NULL, "a", 0) << endl;
     if (loopRecPointerLoaded->feed(NULL, "a", 0) == 1)cout << "SUCESS : RecognizerPointer Loop feed successfull" << endl;
     else cout << "FAILED : RecognizerPointer Loop feed gone wrong" << endl;
 

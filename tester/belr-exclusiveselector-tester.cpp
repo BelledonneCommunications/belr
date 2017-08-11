@@ -29,9 +29,9 @@ static void char_xselector(void) {
   long savePosition = 0;
 
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -78,9 +78,9 @@ static void xsel_xselector(void) {
   long savePosition = 0;
 
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
   //Selector with an Exclusive Selector inside
@@ -129,9 +129,9 @@ static void xsel_xselector(void) {
 static void sel_xselector(void) {
   long savePosition = 0;
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -181,9 +181,9 @@ static void sel_xselector(void) {
 static void loop_xselector(void) {
   long savePosition = 0;
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -221,9 +221,9 @@ static void sequence_xselector(void) {
   long savePosition = 0;
 
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
   //Selector with a sequence of 4 characters
@@ -267,9 +267,9 @@ static void literal_xselector(void) {
   long savePosition = 0;
 
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
   // Selector with a Literal
@@ -303,9 +303,9 @@ static void literal_xselector(void) {
 static void xchar_xselector(void) {
   long savePosition = 0;
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
       rcptrItEnd = (mRecognizerPointersLoaded.end());
       rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -353,9 +353,9 @@ static void recp_xselector(void) {
   long savePosition = 0;
 
 
-      std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-      std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+      std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+      std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
   //Selector with a RecognizerPointer

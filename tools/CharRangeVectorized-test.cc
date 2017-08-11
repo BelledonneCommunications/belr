@@ -68,8 +68,9 @@ int main(int argc, char *argv[]){
 //verification du save and mload
 		cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
-		if(stringBasic->equal(stringBasicLoaded)) cout << "SUCESS : CharRange matches loaded" << endl;
+		if(*stringBasic.get() == *stringBasicLoaded.get()) cout << "SUCESS : CharRange matches loaded" << endl;
   	else cout << "FAILED : CharRange doesnt match loaded" << endl;
+    
 
 		cout << "*********FEEDING THE LOADED RECOGNIZERS*********" << endl;
 

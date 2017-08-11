@@ -50,7 +50,7 @@ static void basicgrammar_save(void) {
   std::chrono::duration<double> elapsedFirst = finish - start;
 
   BC_ASSERT_FALSE(!grammar);
-  
+
   //Save grammar
   grammar->createGrammarDump(grammarDump);
 
@@ -65,9 +65,12 @@ static void basicgrammar_save(void) {
   loadedGram->createGrammarDump(grammarDump2);
   string g1 = openFile(grammarDump.c_str());
   string g2 = openFile(grammarDump2.c_str());
+	shared_ptr<Grammar> loadedGram2 = Grammar::loadVectRulesMap(grammarDump2);
+
   BC_ASSERT_STRING_EQUAL(g1.c_str(), g2.c_str());
 
   BC_ASSERT_TRUE(grammar->equal(loadedGram));
+	BC_ASSERT_TRUE(loadedGram->equal(loadedGram2));
 
   BC_ASSERT_TRUE(elapsedFirst.count() > elapsedSecond.count());
 

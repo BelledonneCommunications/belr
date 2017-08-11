@@ -27,9 +27,9 @@ extern std::vector<std::string> split(const std::string &s, char delim);
 
 static void char_sequence(void) {
   long savePosition = 0;
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -74,9 +74,9 @@ static void char_sequence(void) {
 }
 static void xsel_sequence(void) {
   long savePosition = 0;
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -127,9 +127,9 @@ static void xsel_sequence(void) {
 static void sel_sequence(void) {
   long savePosition = 0;
 
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -179,9 +179,9 @@ static void sel_sequence(void) {
 static void loop_sequence(void) {
   long savePosition = 0;
 
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -217,9 +217,9 @@ static void loop_sequence(void) {
 }
 static void sequence_sequence(void) {
   long savePosition = 0;
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -264,9 +264,9 @@ static void sequence_sequence(void) {
 static void literal_sequence(void) {
   long savePosition = 0;
 
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -301,9 +301,9 @@ static void literal_sequence(void) {
 static void xchar_sequence(void) {
   long savePosition = 0;
 
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
   rcptrItEnd = (mRecognizerPointersLoaded.end());
   rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
@@ -351,9 +351,9 @@ static void recp_sequence(void) {
   long savePosition = 0;
 
 
-  std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-  std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+  std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+  std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
   //Selector with a RecognizerPointer
   shared_ptr<Sequence> sequence = Foundation::sequence();

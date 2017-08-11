@@ -80,10 +80,10 @@ int main(int argc, char *argv[]){
 
 	cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
-	if(character->equal(characterLoaded)) cout << "SUCESS : first character matches loaded" << endl;
+	if(character == characterLoaded) cout << "SUCESS : first character matches loaded" << endl;
   else cout << "FAILED : first character doesnt match loaded" << endl;
 
-	if(character2->equal(characterLoaded2)) cout << "SUCESS : second character matches loaded" << endl;
+	if(character2 == characterLoaded2) cout << "SUCESS : second character matches loaded" << endl;
 	else cout << "FAILED : second character doesnt match loaded" << endl;
 
 	cout << "*********FEEDING THE LOADED RECOGNIZERS*********" << endl;

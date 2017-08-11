@@ -73,16 +73,25 @@ void Recognizer::setName(const std::string& name){
 	mId=++id_base;
 }
 
+void Recognizer::setOnlyName(const std::string& name){
+	mName= name;
+}
+
+void Recognizer::setId(int Id){
+	mId= Id;
+}
+
 const string &Recognizer::getName()const{
 	return mName;
 }
 
 size_t Recognizer::feed(const shared_ptr<ParserContextBase> &ctx, const string &input, size_t pos){
 	size_t match;
-
 	ParserLocalContext hctx;
-	if (ctx) ctx->beginParse(hctx, shared_from_this());
+	//cout << "DEBUG : recognizer name " << mName << endl;
+ 	if (ctx) ctx->beginParse(hctx, shared_from_this());
 	match=_feed(ctx, input, pos);
+
 	if (match!=string::npos && match>0){
 		if (0 && mName.size()>0){
 			string matched=input.substr(pos,match);
@@ -90,7 +99,6 @@ size_t Recognizer::feed(const shared_ptr<ParserContextBase> &ctx, const string &
 		}
 	}
 	if (ctx) ctx->endParse(hctx, input, pos, match);
-
 	return match;
 }
 
@@ -151,7 +159,7 @@ void CharRecognizer::_optimize(int recursionLevel){
 
 /**
     Saves Char regognizer attributes in a file
-		write format is : TAG mCaseSensitive mToRecognize
+		write format is : TAG <mName> <mId> <mCaseSensitive> <mToRecognize>
 		TAG is "CR"
     @param std:: ofstream out stream of the file.
 					long : save position inside the file
@@ -162,7 +170,7 @@ void CharRecognizer::save(std::ofstream& outFile, long &savePos){
 	outFile.seekp(savePos, ios::beg);
 
 		if(outFile){
-			outFile << "CR" << " " << mCaseSensitive  << " " <<	mToRecognize << " ";
+			outFile << "CR" << " " << mName << " " << mId << " " << mCaseSensitive  << " " <<	mToRecognize << " ";
 			savePos = outFile.tellp();
 		}
 		else{
@@ -180,28 +188,40 @@ void CharRecognizer::save(std::ofstream& outFile, long &savePos){
 shared_ptr<CharRecognizer> CharRecognizer::loadVect(std::vector<string>::const_iterator &inIter){
 
 	if (*(inIter) == "CR"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
 		bool mCaseSensitive_loaded = stoi(*(++inIter));
 		int mToRecognize_loaded = stoi(*(++inIter));
 		++inIter;
-		return make_shared<CharRecognizer>(mToRecognize_loaded , mCaseSensitive_loaded);
+		auto crRecon =  make_shared<CharRecognizer>(mToRecognize_loaded , mCaseSensitive_loaded);
+		crRecon->mName = mNameReloaded;
+		crRecon->mId = mIdReloaded;
+		return crRecon;
 	}
 	else
 		cerr << "ERROR reading file : no CHAR RECOGNIZER tag found" << endl;
 	return NULL;
 }
 
+
+/**
+  Verifies if the CharRecognizer is equal to the one passed in parameter
+	returns true if that's the case
+	@return bool
+*/
 bool CharRecognizer::equal(const shared_ptr<Recognizer> &CR){
 	//Using dynamic cast to have acces to the attributes of the CharRecognizer object
-	const shared_ptr<CharRecognizer> CR_local = dynamic_pointer_cast<CharRecognizer>(CR);
-	return((CR_local->mToRecognize == mToRecognize) && (CR_local->mCaseSensitive == mCaseSensitive)) ? true : false;
+	shared_ptr<CharRecognizer> CR_local = dynamic_pointer_cast<CharRecognizer>(CR);
+	return((CR_local->mToRecognize == mToRecognize) && (CR_local->mCaseSensitive == mCaseSensitive) && mName == CR_local->getName() && mId == CR_local->getId()) ? true : false;
 }
 
-//DEBUG FUNCTION
-void CharRecognizer::printtype(){
-	cout << " type:CR ";
+bool CharRecognizer::operator==(Recognizer &CR){
+	return this->equal(CR.shared_from_this());
 }
 
-
+/**
+  function used to set the right pointed element for the recognizer pointers
+*/
 void CharRecognizer::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	//nothing to do
 }
@@ -282,18 +302,18 @@ void Selector::_optimize(int recursionLevel){
 }
 /**
     Saves Selector attributes in a file
-		write format is : TAG mIsExclusive numberOfElements Element1 Element2 Element3
+		write format is : TAG mName mId mIsExclusive numberOfElements Element1 Element2 Element3
 		each Element is a recognizer meaning it has got its own format
 		TAG is "SEL"
     @param std:: ofstream out stream of the file.
-		long : save position inside the file
+		long : save position inside the output file
     @return void
 */
 void Selector::save(std::ofstream& outFile, long &savePos){
 	outFile.seekp(savePos, ios::beg);
 
 		if(outFile){
-			outFile << "SEL" << " " << mIsExclusive  << " ";
+			outFile << "SEL" << " " << mName << " " << mId << " "<< mIsExclusive  << " ";
 			savePos = outFile.tellp();
 			int recognizerListSize = 0;
 			//the number of elements in the recognizer list is needed when loading the Selector afterwards
@@ -314,22 +334,27 @@ void Selector::save(std::ofstream& outFile, long &savePos){
 /**
     Creates a Selector from parsed data
 
-    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+    @param std::vector<string>::const_iterator &inIter: iterator over a string vector representing the parsed line from the file
 		elements are parsed with space as separator
+						std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin : iterator set on the first element of the recognizers pointers list
+						std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd : iterator set on the last element of the recognizers pointers list
+						these two parameters are used to go through the recognizers pointers list and look for a match incase a RECP tag is found and then set it correctly in the lodaded recognizer
     @return shared_ptr<Selector>
 */
-shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd){
+shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	shared_ptr<Selector> selector_reloaded = NULL;
 	if(*inIter == "SEL"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
 		bool mIsExclusive_loaded = stoi(*(++inIter));
 		int recognizerListSize = stoi(*(++inIter));
 		selector_reloaded = Foundation::selector(0);
 		selector_reloaded->mIsExclusive = mIsExclusive_loaded;
-
+		selector_reloaded->mName = mNameReloaded;
+		selector_reloaded->mId = mIdReloaded;
 		string insideTAG = *(++inIter);
 		for(int i=0; i<recognizerListSize; i++){
 			insideTAG = *(inIter);
-	//		cout << "DEBUG :: inside selector tag found :<" << insideTAG << "> element n :" << i << endl;
 		  if (insideTAG == "CR") {selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));}
       else if(insideTAG == "SEQ") {selector_reloaded->addRecognizer(Sequence::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));}
       else if(insideTAG == "LOOP") {selector_reloaded->addRecognizer(Loop::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));}
@@ -338,22 +363,26 @@ shared_ptr<Selector> Selector::loadVect(std::vector<string>::const_iterator &inI
       else if(insideTAG == "XSEL") {selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));}
       else if(insideTAG == "SEL") {selector_reloaded->addRecognizer(Selector::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));}
       else if(insideTAG == "RECP") { selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));}
-      else std::cerr << "ERROR : inside selector Type not recognized found <" << insideTAG << "> instead"<< '\n';
+      else std::cerr << "ERROR : Tag inside selector not defined, found <" << insideTAG << "> instead"<< '\n';
 		}
 	}
 	else
-		cerr << "ERROR : No SELECTOR tag found , found <" << *inIter << "> instead"<< endl;
+		cerr << "ERROR : No SELECTOR tag, found <" << *inIter << "> instead"<< endl;
 	return selector_reloaded;
 }
 
-
+/**
+	Verifies if two selectors are equal
+	compares names , id, and the list of the recognizers
+	@param : const std::shared_ptr<Recognizer>
+*/
 bool Selector::equal(const std::shared_ptr<Recognizer> &SEL){
 
 	const shared_ptr<Selector> SEL_local = dynamic_pointer_cast<Selector>(SEL);
 	list<shared_ptr<Recognizer>>::iterator i_local = SEL_local->mElements.begin();
 	list<shared_ptr<Recognizer>>::iterator i = mElements.begin();
-
 	bool condition = true;
+
 	while (condition == true && i!=mElements.end()){
 		if (!(*i)->equal(*i_local)) {
 			condition = false;
@@ -362,17 +391,21 @@ bool Selector::equal(const std::shared_ptr<Recognizer> &SEL){
 		advance(i_local,1);
 
 	}
-	return(condition && (SEL_local->mIsExclusive == mIsExclusive)) ? true : false;
+	return(condition && (SEL_local->mIsExclusive == mIsExclusive) && (mName == SEL_local->getName()) && (mName == SEL_local->getName())) ? true : false;
 }
 
-//DEBUG FUNCTION
-void Selector::printtype(){
-	cout << "type : SEL";
-	for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
-				(*it)->printtype();
-	}
+/**
+	Verifies if two selectors are equal
+	compares names , id, and the list of the recognizers
+	@param : belr::Recognizer
+*/
+bool Selector::operator==(Recognizer &SEL){
+	return this->equal(SEL.shared_from_this());
 }
 
+/**
+function used to set the right pointed element for the recognizer pointers
+*/
 void Selector::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	for(std::list<std::shared_ptr<Recognizer>>::const_iterator it = mElements.begin() ;it!=mElements.end();it++)
 		(*it)->linkPointer(rcptrIterBegin, rcptrIterEnd);
@@ -389,16 +422,16 @@ size_t ExclusiveSelector::_feed(const shared_ptr<ParserContextBase> &ctx, const 
 
 /**
     Saves ExclusiveSelector attributes in a file
-		write format is : TAG mIsExclusive exRecognizerListSize Element1 Element2 ...
+		write format is : TAG mName mId mIsExclusive exRecognizerListSize Element1 Element2 ...
 		TAG is "XSEL"
     @param std:: ofstream out stream of the file.
-					long : save position inside the file
+					long : save position inside the output file
     @return void
 */
 void ExclusiveSelector::save(std::ofstream& outFile, long &savePos){
 		outFile.seekp(savePos, ios::beg);
 		if(outFile){
-			outFile << "XSEL" << " " << mIsExclusive  << " ";
+			outFile << "XSEL" << " " << mName << " " << mId << " "<< mIsExclusive  << " ";
 			int exRecognizerListSize = 0;
 			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
 				exRecognizerListSize++ ;
@@ -417,21 +450,25 @@ void ExclusiveSelector::save(std::ofstream& outFile, long &savePos){
 /**
     Creates an ExclusiveSelector from parsed data
 
-    @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
+    @param std::vector<string>::const_iterator &inIter: iterator over a string vector representing the parsed line from the file
 		elements are parsed with space as separator
-    @return shared_ptr<ExclusiveSelector>
+						std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin : iterator set on the first element of the recognizers pointers list
+						std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd : iterator set on the last element of the recognizers pointers list
+						these two parameters are used to go through the recognizers pointers list and look for a match incase a RECP tag is found and then set it correctly in the lodaded recognizer
+    @return shared_ptr<Selector>
 */
-shared_ptr<ExclusiveSelector> ExclusiveSelector::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd){
-	shared_ptr<Selector> selector_reloaded = NULL;
-	//cout << "DEBUG :: tag must be XSEL :: <" << *inIter << ">" << endl;
+shared_ptr<ExclusiveSelector> ExclusiveSelector::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
+	shared_ptr<ExclusiveSelector> selector_reloaded = NULL;
 	if(*inIter == "XSEL"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
 		bool mIsExclusive_loaded = stoi(*(++inIter));
 		int recognizerListSize = stoi(*(++inIter));
-		selector_reloaded = Foundation::selector(mIsExclusive_loaded);
-
+		selector_reloaded = dynamic_pointer_cast<ExclusiveSelector>(Foundation::selector(mIsExclusive_loaded));
+		selector_reloaded->mName = (mNameReloaded);
+		selector_reloaded->mId = (mIdReloaded) ;
 		string insideTAG = *(++inIter);
 		for(int i=0; i<recognizerListSize; i++){
-		//	cout << "DEBUG :: inside exclusive selector tag found :<" << *inIter << "> element n :<"<< i << ">" << endl;
 			insideTAG = *inIter;
 			if (insideTAG == "CR") selector_reloaded->addRecognizer(CharRecognizer::loadVect(inIter));
       else if(insideTAG == "SEQ") selector_reloaded->addRecognizer(Sequence::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));
@@ -441,18 +478,20 @@ shared_ptr<ExclusiveSelector> ExclusiveSelector::loadVect(std::vector<string>::c
       else if(insideTAG == "XSEL")selector_reloaded->addRecognizer(ExclusiveSelector::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));
       else if(insideTAG == "SEL") selector_reloaded->addRecognizer(Selector::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));
       else if(insideTAG == "RECP") selector_reloaded->addRecognizer(RecognizerPointer::loadVect(inIter, rcptrIterBegin, rcptrIterEnd));
-      else std::cerr << "ERROR : inside exclusive selector Type not recognized found <"<< insideTAG << "> instead" << '\n';
+      else std::cerr << "ERROR : Tag inside exclusive selector not defined, found <"<< insideTAG << "> instead" << '\n';
 		}
 	}
 	else{
-		cerr << "ERROR : No EXCLUSIVE SELECTOR tag found, found <> instead"<<  endl;
+		cerr << "ERROR : No EXCLUSIVE SELECTOR tag, found <> instead"<<  endl;
 	}
 	return dynamic_pointer_cast<ExclusiveSelector>(selector_reloaded);
 }
 
-
+/**
+	Verifies if two exclusive selecors are equal
+	checks name, id, exclusivity, and recognizers list
+*/
 bool ExclusiveSelector::equal(const std::shared_ptr<Recognizer> &SEL){
-	//cout << "DEBUG comparing XSELS" << endl;
 
 	const shared_ptr<ExclusiveSelector> SEL_local = dynamic_pointer_cast<ExclusiveSelector>(SEL);
 	list<shared_ptr<Recognizer>>::iterator i_local = SEL_local->mElements.begin();
@@ -464,18 +503,16 @@ bool ExclusiveSelector::equal(const std::shared_ptr<Recognizer> &SEL){
 		advance(i,1);
 		advance(i_local,1);
 	}
-	return(condition && (SEL_local->mIsExclusive == mIsExclusive)) ? true : false;
+	return(condition && (SEL_local->mIsExclusive == mIsExclusive) && (mName == SEL_local->getName()) && (mId == SEL_local->getId())) ? true : false;
 }
 
-//DEBUG FUNCTION
-void ExclusiveSelector::printtype(){
-	cout << "type : XSEL";
-	for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
-				(*it)->printtype();
-	}
+bool ExclusiveSelector::operator==(Recognizer &SEL){
+	return this->equal(SEL.shared_from_this());
 }
 
-
+/**
+function used to set the right pointed element for the recognizer pointers
+*/
 void ExclusiveSelector::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	for(std::list<std::shared_ptr<Recognizer>>::const_iterator it = mElements.begin() ;it!=mElements.end();it++)
 		(*it)->linkPointer(rcptrIterBegin, rcptrIterEnd);
@@ -517,9 +554,10 @@ void Sequence::_optimize(int recursionLevel){
 	for (auto it=mElements.begin(); it!=mElements.end(); ++it)
 		(*it)->optimize(recursionLevel);
 }
+
 /**
     Saves Sequence attributes in a file
-		write format is : TAG sequenceListSize Element1 Element2 ...
+		write format is : TAG mName mId sequenceListSize Element1 Element2 ...
 		TAG is "SEQ"
     @param std:: ofstream out stream of the file.
 					long : save position inside the file
@@ -529,7 +567,7 @@ void Sequence::save(std::ofstream& outFile, long &savePos){
 
 		outFile.seekp(savePos, ios::beg);
 		if(outFile){
-			outFile << "SEQ" << " ";
+			outFile << "SEQ" << " " << mName << " "<< mId << " ";
 			int sequenceListSize = 0;
 			for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end(); ++it){
 				sequenceListSize++ ;
@@ -549,14 +587,22 @@ void Sequence::save(std::ofstream& outFile, long &savePos){
 
     @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
 		elements are parsed with space as separator
+					std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin : iterator set on the first element of the recognizers pointers list
+					std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd : iterator set on the last element of the recognizers pointers list
+		these two parameters are used to go through the recognizers pointers list and look for a match incase a RECP tag is found and then set it correctly in the lodaded recognizer
+
     @return shared_ptr<Sequence>
 */
-shared_ptr<Sequence> Sequence::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd){
+shared_ptr<Sequence> Sequence::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	shared_ptr<Sequence> sequence_reloaded = NULL;
 
 	if(*inIter == "SEQ"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
 		int recognizerListSize = stoi(*(++inIter));
 		sequence_reloaded = make_shared<Sequence>();
+		sequence_reloaded->mName = mNameReloaded;
+		sequence_reloaded->mId = mIdReloaded;
 		string insideTAG = *(++inIter);
 		for(int i=0; i<recognizerListSize; i++){
 			insideTAG = *(inIter);
@@ -585,6 +631,8 @@ bool Sequence::equal(const std::shared_ptr<Recognizer> &SEQ){
 	list<shared_ptr<Recognizer>>::iterator i_local = SEQ_local->mElements.begin();
 	list<shared_ptr<Recognizer>>::iterator i = mElements.begin();
 	bool condition = true;
+	if (mName != SEQ_local->getName()) condition = false;
+	if(mId != SEQ_local->getId()) condition = false;
 
 	while (condition == true && i!=mElements.end()){
 		if (!(*i)->equal(*i_local)) {
@@ -596,14 +644,14 @@ bool Sequence::equal(const std::shared_ptr<Recognizer> &SEQ){
 	return(condition) ? true : false;
 }
 
-//DEBUG FUNCTION
-void Sequence::printtype(){
-	cout << "type : SEQ";
-	for(list<shared_ptr<Recognizer>>::iterator it = mElements.begin(); it!=mElements.end() ; ++it){
-				(*it)->printtype();
-	}
+bool Sequence::operator==(Recognizer &SEQ){
+	return this->equal(SEQ.shared_from_this());
+
 }
 
+/**
+function used to set the right pointed element for the recognizer pointers
+*/
 void Sequence::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	for(std::list<std::shared_ptr<Recognizer>>::const_iterator it = mElements.begin() ;it!=mElements.end();it++)
 		(*it)->linkPointer(rcptrIterBegin, rcptrIterEnd);
@@ -643,7 +691,7 @@ void Loop::_optimize(int recursionLevel){
 
 /**
     Saves Loop attributes in a file
-		write format is : TAG mMin mMax mRecognizer
+		write format is : TAG mName mId mMin mMax mRecognizer
 		TAG is "LOOP"
     @param std:: ofstream out stream of the file.
 					long : save position inside the file
@@ -652,11 +700,11 @@ void Loop::_optimize(int recursionLevel){
 void Loop::save(std::ofstream& outFile, long &savePos){
 	outFile.seekp(savePos, ios::beg);
 	if(outFile){
-		outFile << "LOOP" << " " << mMin << " " << mMax << " ";
+		outFile << "LOOP" << " " << mName <<  " " << mId << " "<< mMin << " " << mMax << " ";
 		mRecognizer->save(outFile, savePos);
 	}
 	else{
-		cerr << "ecriture dans le fichier impossibe" << endl;
+		cerr << "ERROR : file stream unavailable" << endl;
 	}
 }
 
@@ -665,18 +713,25 @@ void Loop::save(std::ofstream& outFile, long &savePos){
 
     @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
 		elements are parsed with space as separator
+					std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin : iterator set on the first element of the recognizers pointers list
+					std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd : iterator set on the last element of the recognizers pointers list
+these two parameters are used to go through the recognizers pointers list and look for a match incase a RECP tag is found and then set it correctly in the lodaded recognizer
+
     @return shared_ptr<Loop>
 */
-shared_ptr<Loop> Loop::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd){
+shared_ptr<Loop> Loop::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 
 	shared_ptr<Loop> loop_reloaded = NULL;
 
 	if(*inIter == "LOOP"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
     int mMin_loaded =  stoi(*(++inIter));
     int mMax_loaded =  stoi(*(++inIter));
     loop_reloaded = make_shared<Loop>();
+		loop_reloaded->mName = (mNameReloaded);
+		loop_reloaded->mId = mIdReloaded;
 		string insideTAG = *(++inIter);
-
 		if (insideTAG == "CR") loop_reloaded->setRecognizer(CharRecognizer::loadVect(inIter), mMin_loaded, mMax_loaded);
 		else if(insideTAG == "XSEL") loop_reloaded->setRecognizer(ExclusiveSelector::loadVect(inIter, rcptrIterBegin, rcptrIterEnd), mMin_loaded, mMax_loaded);
 		else if(insideTAG == "SEL") loop_reloaded->setRecognizer(Selector::loadVect(inIter, rcptrIterBegin, rcptrIterEnd), mMin_loaded, mMax_loaded);
@@ -685,28 +740,29 @@ shared_ptr<Loop> Loop::loadVect(std::vector<string>::const_iterator &inIter, std
     else if(insideTAG == "XCR") loop_reloaded->setRecognizer(CharRange::loadVect(inIter), mMin_loaded, mMax_loaded);
     else if(insideTAG == "LIT") loop_reloaded->setRecognizer(Literal::loadVect(inIter), mMin_loaded, mMax_loaded);
     else if(insideTAG == "RECP") loop_reloaded->setRecognizer(RecognizerPointer::loadVect(inIter, rcptrIterBegin, rcptrIterEnd), mMin_loaded, mMax_loaded);
-		else std::cerr << "ERROR : inside Loop Type not recognized found <" << insideTAG << "> instead" <<   '\n';
+		else std::cerr << "ERROR : tag inside Loop not recognized ,found <" << insideTAG << "> instead" << endl;
 	}
 	else
-		cerr << "ERROR : No LOOP tag found, found <" << *inIter << "> instead" << endl;
-	return (loop_reloaded);
+		cerr << "ERROR : No LOOP tag, found <" << *inIter << "> instead" << endl;
+	return loop_reloaded;
 }
 
 
-
+/**
+	Verifies if two Loop recognizers are equal
+*/
 bool Loop::equal(const std::shared_ptr<Recognizer> &LOP){
 	const shared_ptr<Loop> LOP_local = dynamic_pointer_cast<Loop>(LOP);
-	return((LOP_local->mMin == mMin) && (LOP_local->mMax == mMax) && (mRecognizer->equal(LOP_local->mRecognizer))) ? true : false;
+	return((LOP_local->mMin == mMin) && (LOP_local->mMax == mMax) && (mRecognizer->equal(LOP_local->mRecognizer)) && (LOP_local->getName() == mName)  && (mId == LOP_local->getId())	 ) ? true : false;
 }
 
-//DEBUG FUNCTION
-void Loop::printtype(){
-	cout << "type : Loop";
-	mRecognizer->printtype();
-
+bool Loop::operator==(Recognizer &LOP){
+	return this->equal(LOP.shared_from_this());
 }
 
-
+/**
+function used to set the right pointed element for the recognizer pointers
+*/
 void Loop::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 		mRecognizer->linkPointer(rcptrIterBegin, rcptrIterEnd);
 }
@@ -737,7 +793,7 @@ void CharRange::save(std::ofstream& outFile, long &savePos){
 
 		if(outFile){
 
-			outFile << "XCR" << " " << mBegin  << " " <<	mEnd << " ";
+			outFile << "XCR" << " " << mName << " " << mId << " "<< mBegin  << " " <<	mEnd << " ";
 			savePos = outFile.tellp();
 		}
 		else{
@@ -754,11 +810,17 @@ void CharRange::save(std::ofstream& outFile, long &savePos){
 */
 shared_ptr<CharRange> CharRange::loadVect(std::vector<string>::const_iterator &inIter){
 	if(*(inIter) == "XCR"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
+
     int mBegin_loaded =  stoi(*(++inIter));
     int mEnd_loaded =  stoi(*(++inIter));
     ++inIter;
-    return make_shared<CharRange>(mBegin_loaded, mEnd_loaded);
-  }
+    auto charRangeRecon =  make_shared<CharRange>(mBegin_loaded, mEnd_loaded);
+		charRangeRecon->mName = (mNameReloaded);
+		charRangeRecon->mId = mIdReloaded;
+		return charRangeRecon;
+	}
 	else{
 		cerr << "ERROR : no CHARRANGE tag found, found <" << *inIter << "> instead" << endl;
 	}
@@ -769,16 +831,16 @@ shared_ptr<CharRange> CharRange::loadVect(std::vector<string>::const_iterator &i
 
 bool CharRange::equal(const shared_ptr<Recognizer> &XCR){
 	const shared_ptr<CharRange> XCR_local = dynamic_pointer_cast<CharRange>(XCR);
-	return((XCR_local->mBegin == mBegin) && (XCR_local->mEnd == mEnd)) ? true : false;
+	return((XCR_local->mBegin == mBegin) && (XCR_local->mEnd == mEnd) && (mName == XCR_local->getName()) && (mId == XCR_local->getId())) ? true : false;
 }
 
-//DEBUG FUNCTION
-void CharRange::printtype(){
-	cout << "type : CharRange";
+bool CharRange::operator==(Recognizer &XCR){
+	return this->equal(XCR.shared_from_this());
+	}
 
-}
-
-
+/**
+function used to set the right pointed element for the recognizer pointers
+*/
 void CharRange::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	// nothing to do
 }
@@ -833,7 +895,7 @@ bool Literal::_getTransitionMap(TransitionMap* mask){
 void Literal::save(std::ofstream& outFile, long &savePos){
 	outFile.seekp(savePos, ios::beg);
 	if(outFile){
-		outFile << "LIT" << " " << mLiteral  << " " ;
+		outFile << "LIT" << " " << mName << " " << mId << " "<< mLiteral  << " " ;
 		savePos = outFile.tellp();
 	}
 	else{
@@ -850,9 +912,15 @@ void Literal::save(std::ofstream& outFile, long &savePos){
 */
 shared_ptr<Literal> Literal::loadVect(std::vector<string>::const_iterator &inIter){
   if((*inIter) == "LIT"){
+		string mNameReloaded =  *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
+
     string mliteral_loaded =  *(++inIter);
     ++inIter;
-    return make_shared<Literal>(mliteral_loaded);
+    auto literalRecon = make_shared<Literal>(mliteral_loaded);
+		literalRecon->mName = (mNameReloaded);
+		literalRecon->mId = mIdReloaded;
+		return literalRecon;
   }
 	else{
   	cerr << "ERROR : no LITERAL tag found" << endl;
@@ -864,15 +932,16 @@ shared_ptr<Literal> Literal::loadVect(std::vector<string>::const_iterator &inIte
 
 bool Literal::equal(const shared_ptr<Recognizer> &LIT){
 	const shared_ptr<Literal> LIT_local = dynamic_pointer_cast<Literal>(LIT); //cast en type approprié pour pouvoir accéder aux attributs
-	return(LIT_local->mLiteral == mLiteral) ? true : false;
+	return((LIT_local->mLiteral == mLiteral) && ((LIT_local)->getName() == mName) && (LIT_local->getId() == mId)) ? true : false;
 }
 
-//DEBUG FUNCTION
-void Literal::printtype(){
-	cout << "type : Literal";
+bool Literal::operator==(Recognizer &LIT){
+	return this->equal(LIT.shared_from_this());
 }
 
-
+/**
+function used to set the right pointed element for the recognizer pointers
+*/
 void Literal::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	// nothing to do
 }
@@ -914,7 +983,7 @@ void RecognizerPointer::_optimize(int recursionLevel){
 
 /**
     Saves Literal attributes in a file
-		write format is : TAG mRecognizer
+		write format is : TAG mName mId mRecognizer->mName
 		TAG is "RECP"
     @param std:: ofstream out stream of the file.
 					long : save position inside the file
@@ -923,7 +992,7 @@ void RecognizerPointer::_optimize(int recursionLevel){
 void RecognizerPointer::save(std::ofstream& outFile, long &savePos){ // ajouter un parametre la hashmap des regles
 	outFile.seekp(savePos, ios::beg);
 	if(outFile){
-		outFile << "RECP" << " " << mName << " ";
+		outFile << "RECP" << " " << mName << " " << mId << " " << mRecognizer->getName() << " " ;
 		savePos = outFile.tellp();
 	}
 	else{
@@ -936,26 +1005,32 @@ void RecognizerPointer::save(std::ofstream& outFile, long &savePos){ // ajouter 
 
     @param std::vector<string>::const_iterator : iterator over a string vector representing the parsed line from the file
 		elements are parsed with space as separator
+					std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin : iterator set on the first element of the recognizers pointers list
+					std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd : iterator set on the last element of the recognizers pointers list
+these two parameters are used to go through the recognizers pointers list and look for a match incase a RECP tag is found and then set it correctly in the lodaded recognizer
     @return shared_ptr<RecognizerPointer>
 */
-shared_ptr<RecognizerPointer> RecognizerPointer::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd){
+shared_ptr<RecognizerPointer> RecognizerPointer::loadVect(std::vector<string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	shared_ptr<RecognizerPointer> recognpointer_reloaded = NULL;
 	if((*inIter) == "RECP"){
 		recognpointer_reloaded = make_shared<RecognizerPointer>();
-		std::string mNameReLoaded = *(++inIter);
-
-		recognpointer_reloaded->setName(mNameReLoaded);
+		std::string mNameReloaded = *(++inIter);
+		int mIdReloaded = stoi(*(++inIter));
+		std::string mRecognizerNameReloaded = *(++inIter);
+		recognpointer_reloaded->mId = mIdReloaded;
+		recognpointer_reloaded->mName = (mNameReloaded);
 //Check if the recognizer pointer is already parsed link it since we're at it
-		for(std::list<std::shared_ptr<Recognizer>>::iterator rcptrIter = (rcptrIterBegin);  rcptrIter != rcptrIterEnd ; ++rcptrIter){
-			shared_ptr<RecognizerPointer>rcptLocal = dynamic_pointer_cast<RecognizerPointer>(*rcptrIter);
-			if (mNameReLoaded == (rcptLocal)->getName()){
-				recognpointer_reloaded->setPointed((rcptLocal)->getPointed());
+		for(std::list<std::shared_ptr<RecognizerPointer>>::iterator rcptrIter = (rcptrIterBegin);  rcptrIter != rcptrIterEnd ; ++rcptrIter){
+		//	shared_ptr<RecognizerPointer>rcptLocal = dynamic_pointer_cast<RecognizerPointer>(*rcptrIter);
+			if (mNameReloaded == (*rcptrIter)->getName()){
+				recognpointer_reloaded->setPointed((*rcptrIter)->getPointed());
 			}
 		}
+		if(recognpointer_reloaded->getPointed()) (recognpointer_reloaded->getPointed())->setOnlyName(mRecognizerNameReloaded);
 		++inIter;
 	}
 	else{
-		cerr << "no RECONGIZER POINTER tag found" << endl;
+		cerr << "ERROR : no RECONGIZER POINTER tag found" << endl;
 	}
 	return recognpointer_reloaded;
 }
@@ -971,21 +1046,21 @@ bool RecognizerPointer::equal(const std::shared_ptr<Recognizer> &LOP){
 		//comparing adresses of recignizers because camparing the actual recignizers causes a segmentation in some cases
 	condition = (&mRecognizer == &(LOP_local->mRecognizer)) ? true : false;
 	condition = (this->getName() == LOP_local->getName()) ? true : false;
+	condition = (mRecognizer->getName() == (LOP_local->mRecognizer)->getName()) ? true : false;
 	}
 	return condition;
 }
 
-//DEBUG FUNCTION
-void RecognizerPointer::printtype(){
-	cout << "type : RECP named :: <" << mName << ">";
+bool RecognizerPointer::operator==(Recognizer &RCPTR){
+	return this->equal(RCPTR.shared_from_this());
+}
 
-		}
-
-
+/**
+	function used to set the right pointed element for the recognizer pointers
+*/
 void RecognizerPointer::linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd){
 	for(std::list<std::shared_ptr<RecognizerPointer>>::iterator rcptrIter = (rcptrIterBegin);  rcptrIter != rcptrIterEnd ; ++rcptrIter){
 		if (mName == (*rcptrIter)->getName()){
-		//	cout << "DEBUG : linking recognizer :" << mName << ">" << endl;
 			mRecognizer = ((*rcptrIter)->getPointed());
 		}
 	}
@@ -1103,15 +1178,19 @@ int Grammar::getNumRules() const{
 	return (int)mRules.size();
 }
 
+/**
+Saves the rules hash map into output stream
+Format for each line : RuleName => Recognizer
+@param: std::ofstream &outFile : outstream to which data is written
+*/
 void Grammar::saveRulesMap(ofstream &outFile){
 	long grammarSavePosition = 0;
 		if(outFile){
 			for(map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin(); it != mRules.end() ;it++){
 				outFile.seekp(grammarSavePosition, ios::beg);
 				outFile << it->first << " => ";
-				//cout << "DEBUG : key :: " << it->first << endl;
 				grammarSavePosition = outFile.tellp();
-				(it->second)->save(outFile, grammarSavePosition); //recognizer
+				(it->second)->save(outFile, grammarSavePosition);
 				outFile << "\r\n";
 			}
 		}
@@ -1120,15 +1199,20 @@ void Grammar::saveRulesMap(ofstream &outFile){
 		}
 	}
 
+/**
+	Saves the recognizer list into output stream
+	Format for each line : RecognizermName => RecognizermId Recognizer
+	@param: std::ofstream &outFile : outstream to which data is written
+*/
 void Grammar::savePointersList(ofstream &outFile){
 	long grammarSavePosition = 0;
 		if(outFile){
 			for(list<shared_ptr<RecognizerPointer>>::iterator iter= mRecognizerPointers.begin(); iter != mRecognizerPointers.end() ;iter++){
 				outFile.seekp(grammarSavePosition, ios::beg);
-				outFile << (*iter)->getName() << " => ";
+				outFile << (*iter)->getName() <<  " => " << (*iter)->getId() << " ";
 
 				grammarSavePosition = outFile.tellp();
-				((*iter)->getPointed())->save(outFile, grammarSavePosition); //recognizer
+				((*iter)->getPointed())->save(outFile, grammarSavePosition);
 				outFile << "\r\n";
 			}
 		}
@@ -1136,6 +1220,29 @@ void Grammar::savePointersList(ofstream &outFile){
 			cerr << "ERROR writing to file : output stream unavailable" << endl;
 		}
 
+}
+
+/**
+Function that saves the entire grammar into a file which name is specialized as a parameter
+Save format :
+	GrammarName ==>
+	RecognizerPointer1Name => RecognizerPointer1Id PointedElement
+	RecognizerPointer2Name => RecognizerPointer2Id PointedElement
+	RecognizerPointer3Name => RecognizerPointer3Id PointedElement
+	.....
+	END OF RECPTRS
+	Rule1Name => Recognizer
+	Rule2Name => Recognizer
+	Rule3Name => Recognizer
+	.....
+*/
+void Grammar::createGrammarDump(string dumpFileName){
+	ofstream outFile (dumpFileName, ios::out | ios::app | ios::binary);
+	outFile << mName << " ==> "<<endl;
+	this->savePointersList(outFile);
+	outFile << "END OF RECPTRS \r\n" ;
+	this->saveRulesMap(outFile);
+	outFile.close();
 }
 
 /**
@@ -1159,7 +1266,11 @@ template<typename Out>
       return elems;
   }
 
-
+/**
+Function that loads the grammar from the parameter specified fileName
+	@param : std::string fileName :in File name , file in which the grammar was dumped
+	@return : std::shared_ptr<Grammar> : Grammar loaded form the file
+*/
 shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 
   string mNameLoaded = ""; // grammar name
@@ -1172,14 +1283,9 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 	std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded; //list containing recognizer pointers
 	ifstream inFile (fileName, ios::in | ios::binary); //file stream to work on
 	shared_ptr<Grammar> retGram = NULL;
-	std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin = (mRecognizerPointersLoaded.begin());
-	std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd = (mRecognizerPointersLoaded.end());
-
-
-
 
   if ( !inFile )
-    cout << "ERROR : error reading file : no such name";
+    cerr << "ERROR : error reading file : no such name";
   else{
 		//read the whole file in one shot
     std::stringstream buffer;
@@ -1204,6 +1310,8 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
       separator = *(++it);
     }
 		retGram = make_shared<Grammar>(mNameLoaded);
+		std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin = retGram->mRecognizerPointers.begin();
+		std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd = retGram->mRecognizerPointers.end();
 
   	++fileIter;
 		line = (*fileIter);
@@ -1212,8 +1320,8 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 		while( line.compare("END OF RECPTRS \r"))
 		{
 
-			rcptrItBegin = (mRecognizerPointersLoaded.begin());
-			rcptrItEnd = (mRecognizerPointersLoaded.end());
+			rcptrItBegin = (retGram->mRecognizerPointers.begin());
+			rcptrItEnd = (retGram->mRecognizerPointers.end());
 
 			line =  (*fileIter);
 			line.erase(line.size()-1,1); // since grammar are written with a CRLF format: we have at each end of line a "\r\n"
@@ -1229,6 +1337,7 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			}
 			//read a recognizer pointer and put it in da list
 			//Parse the recognizer based on the tag found at the beginning
+			int tempId = stoi(*(++it));
 			tempTag = *(++it);
 
 			if(tempTag == "CR"){tempValue = CharRecognizer::loadVect(it);}
@@ -1239,36 +1348,25 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			else if(tempTag == "LOOP"){tempValue = Loop::loadVect(it, rcptrItBegin, rcptrItEnd);}
 			else if(tempTag == "LIT"){tempValue = Literal::loadVect(it);}
 			else if(tempTag == "RECP") { tempValue = RecognizerPointer::loadVect(it, rcptrItBegin, rcptrItEnd);
-			//tempKey = tempValue->getName();
 			}
 			//create the recognizer pointer set its name and value
 			shared_ptr<RecognizerPointer> recognpointer_reloaded =  make_shared<RecognizerPointer>();
-			recognpointer_reloaded->setName(tempKey.c_str());
+			recognpointer_reloaded->setOnlyName(tempKey.c_str());
 			recognpointer_reloaded->setPointed(tempValue);
+			recognpointer_reloaded->setId(tempId);
 			//insert it into the dummy pointers list
-			mRecognizerPointersLoaded.push_back(recognpointer_reloaded);
+			retGram->mRecognizerPointers.push_back(recognpointer_reloaded);
 
 			++fileIter;
 			line = *fileIter;
 		}
 
-
-		rcptrItBegin = (mRecognizerPointersLoaded.begin());
-		rcptrItEnd = (mRecognizerPointersLoaded.end());
-
-		//transfer the dummy list into the actual recognizer pointers grammar list
-		for(std::list<std::shared_ptr<Recognizer>>::const_iterator rcptrIter = mRecognizerPointersLoaded.begin();  rcptrIter != mRecognizerPointersLoaded.end() ; ++rcptrIter)
-			retGram->mRecognizerPointers.push_back(dynamic_pointer_cast<RecognizerPointer>(*rcptrIter));
-
-		std::list<shared_ptr<RecognizerPointer>>::iterator rcptrIterBegin = (retGram->mRecognizerPointers.begin());
-		std::list<shared_ptr<RecognizerPointer>>::iterator rcptrIterEnd = (retGram->mRecognizerPointers.end());
+		rcptrItBegin = (retGram->mRecognizerPointers.begin());
+		rcptrItEnd = (retGram->mRecognizerPointers.end());
 
 		//do the link for recogizer pointers inside other recognizer pointers :: VERY IMPORTANT
 		for (std::list<shared_ptr<RecognizerPointer>>::iterator linkageIter = retGram->mRecognizerPointers.begin(); linkageIter != retGram->mRecognizerPointers.end() ; linkageIter++){
-		//	if (!(*linkageIter)->getPointed()){
-				((*linkageIter)->getPointed())->linkPointer(rcptrIterBegin, rcptrIterEnd);
-
-		//	}
+				((*linkageIter)->getPointed())->linkPointer(rcptrItBegin, rcptrItEnd);
 		}
 
 		++fileIter;
@@ -1280,7 +1378,6 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			//we parsed based on \n so now we have at each end of line a useless \r character
 			result = split(line, ' ');
 			it = result.begin();
-			//	cout << "DEBUG parsing line <" << line << ">" << endl;
 			//parsing the rule name : support for space separated rule names
 			tempKey = *it;
 			separator = *(++it);
@@ -1291,7 +1388,7 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			//read a recognizer pointer and put it in da list
 			//Parse the recognizer based on the tag found at the beginning
 			tempTag = *(++it);
-
+			string mNameReloaded = tempKey;
 			if(tempTag == "CR"){tempValue = CharRecognizer::loadVect(it);}
 			else if(tempTag == "SEL"){tempValue = Selector::loadVect(it, rcptrItBegin, rcptrItEnd);}
 			else if(tempTag == "XSEL"){tempValue = ExclusiveSelector::loadVect(it, rcptrItBegin, rcptrItEnd);}
@@ -1301,8 +1398,13 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
 			else if(tempTag == "LIT"){tempValue = Literal::loadVect(it);}
 			else if(tempTag == "RECP") { tempValue = RecognizerPointer::loadVect(it, rcptrItBegin, rcptrItEnd);}
 
+
+			if(tempValue->getName() != tempKey){
+				mNameReloaded = tempValue->getName();
+			}
+
+			tempValue->setOnlyName(mNameReloaded);
 			retGram->mRules[tempKey] = tempValue;
-			//retGram->assignRule(tempKey, tempValue);
 			++fileIter;
 		}
 
@@ -1318,127 +1420,72 @@ shared_ptr<Grammar> Grammar::loadVectRulesMap(string fileName){
   return retGram;
 }
 
-void Grammar::createGrammarDump(string dumpFileName){
-	ofstream outFile (dumpFileName, ios::out | ios::app | ios::binary);
-	outFile << mName << " ==> "<<endl;
-	this->savePointersList(outFile);
-	outFile << "END OF RECPTRS \r\n" ;
-	this->saveRulesMap(outFile);
-	outFile.close();
-}
 
 bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	bool condition = true;
-	//compare names
-	if(mName != gramCompared->mName){condition = false;}
-	cout << "DEBUG comparing two names :<" << mName << "> vs <" << gramCompared->mName << ">"<<endl;
-	cout << "NAMES MATCH <" << condition << ">"<<endl;
-
-
-	//compare rules
+	list<shared_ptr<RecognizerPointer>>::iterator itRcp = mRecognizerPointers.begin();
+	list<shared_ptr<RecognizerPointer>>::iterator	itRcpComp = gramCompared->mRecognizerPointers.begin();
 	map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin();
 	map<string,shared_ptr<Recognizer>>::iterator itComp= gramCompared->mRules.begin();
+
+	//compare names
+	if(mName != gramCompared->mName){condition = false;}
+
+	int i =0;
+	while (itRcp!=mRecognizerPointers.end() && condition){
+		if (itRcpComp == gramCompared->mRecognizerPointers.end()) condition =  false;
+			itRcpComp++;
+			itRcp++;
+			i++;
+	}
+
+	//count the number of rules and check if equal between two grammars
+
+	int j = 0;
+	while (it!=mRules.end()){
+		if (itComp == gramCompared->mRules.end() && condition ) condition = false;
+			it++;
+			itComp++;
+			j++;
+		}
+
+	//compare rules
+	itComp = gramCompared->mRules.begin();
+	it = mRules.begin();
 	while (it != mRules.end()/* && condition*/){
 		if(it->first == itComp->first){
-			if(!(it->second)->equal(itComp->second)){
+			if(!(it->second == itComp->second)){
 				condition = false;
-				cout << "mismatch here : <" << it->first << "> vs <" << itComp->first << ">" << endl;
 			}
 		}
 		else{
-			cout << "mismatch here : <" << it->first << "> vs <" << itComp->first << ">" << endl;
 			condition = false;
 		}
 		it++;
 		itComp++;
 	}
-	cout << "RULES CONTENT MATCH <" << condition << ">"<<endl;
-
 
 	//compare recognizer pointers
-	list<shared_ptr<RecognizerPointer>>::iterator itRcp = mRecognizerPointers.begin();
-	list<shared_ptr<RecognizerPointer>>::iterator	itRcpComp = gramCompared->mRecognizerPointers.begin();
+	itRcp = mRecognizerPointers.begin();
+	itRcpComp = gramCompared->mRecognizerPointers.begin();
 	while (itRcp!=mRecognizerPointers.end() && condition){
 		string firstRule = (*itRcp)->getName();
 		string secondRule = (*itRcpComp)->getName();
 		if (!firstRule.compare(secondRule)){
-			if (!((*itRcp)->getPointed())->equal((*itRcpComp)->getPointed())){
-				return false;
+			if (!((*itRcp)->getPointed() == (*itRcpComp)->getPointed())){
+				condition =  false;
 			}
 		}
 		else
-			return false;
-		//count the number of rules and check if equal
+			condition = false;
 		itRcp++;
 		itRcpComp++;
 		}
-		cout << "RCPTRS CONTENT MATCH <" << condition << ">"<<endl;
 
 
-	itRcp = mRecognizerPointers.begin();
-	itRcpComp = gramCompared->mRecognizerPointers.begin();
-	int i =0;
-	while (itRcp!=mRecognizerPointers.end()){
-		//				if(!(*itRcp)->getPointed()) cout << (*itRcp)->getName() << " RULE UNDEFINERD" << endl;
-		if (itRcpComp == gramCompared->mRecognizerPointers.end()) return false;
-			itRcpComp++;
-			itRcp++;
-			i++;
-	}
-	cout << "RECOGNIZERPOINTER NUMBER MATCH <" << condition << ">"<<endl;
 
-	//count the number of rules and check if equal between two grammars
-	itComp = gramCompared->mRules.begin();
-	it = mRules.begin();
-	int j = 0;
-	while (it!=mRules.end()){
-		if (itComp == gramCompared->mRules.end()) condition = false;
-			it++;
-			itComp++;
-			j++;
-		}
-		cout << "RULES NUMBER MATCH <" << condition << ">"<<endl;
 	return condition;
 
-}
-
-void Grammar::debugGrammar(){
-	int j=0;
-	for(map<string,shared_ptr<Recognizer>>::iterator it= mRules.begin(); it != mRules.end() ;it++){
-
-		cout << "******************BEGIN OF RULE ********************" << endl;
-
-		cout << "DEBUG : key "<<it->first << " ";
-		(it->second)->printtype();
-		cout << "******************END OF RULE ********************" << endl;
-			//(it->second)->mRecognizer
-			/*for(list<shared_ptr<RecognizerPointer>>::iterator iter= mRecognizerPointers.begin(); iter != mRecognizerPointers.end() ;iter++){
-				const shared_ptr<RecognizerPointer> itlocal = dynamic_pointer_cast<RecognizerPointer>(it->second);
-				const shared_ptr<RecognizerPointer> itlocalrcp = dynamic_pointer_cast<RecognizerPointer>((*iter));
-*/
-				/*if( itlocalrcp->getName() == itlocal->getName() ){
-					cout << "FOUND IT : adresses match : <" << &(itlocal) << "> vs <"<< &(itlocalrcp) <<">" << endl;
-				}*/
-		//		if((it->first).compare("request-line")) {
-		//			cout << "FOUND IT sip-date" << endl;
-						//	(it->second)->printtype();
-			//		}
-j++;
-}
-cout << "Number of RULES : <"<<j<<">"<<endl;
-
-//		(it->second)->printtype();
-//		cout << " " << endl;
-//}
-int i=0;
-for(list<shared_ptr<RecognizerPointer>>::iterator it= mRecognizerPointers.begin(); it != mRecognizerPointers.end() ;it++){
-	//(*it)->printtype();
-	//cout << " " << endl;
-	if(!(*it)->getPointed()) cout << "MAJOR PROBLEM UNDEFINED RECOGNIZER POINTER <" << (*it)->getName() << endl;
-	//if ((*it)->getName().compare("@request-line")) cout << "FOUND request" << endl;
-	i++;
-}
-cout << "Number of RECPTRS : <"<<i<<">"<<endl;
 }
 
 

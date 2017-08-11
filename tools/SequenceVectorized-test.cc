@@ -18,9 +18,9 @@ using namespace std;
 long savePosition = 0;
 long loadPosition = 0;
 
-std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
@@ -163,19 +163,19 @@ int main(int argc, char *argv[]){
 	cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
 
-	if(sequence1->equal(sequenceLoaded1)) cout << "SUCESS : original 4 CharRecognizer Sequence matches loaded" << endl;
+	if(*sequence1.get() == *sequenceLoaded1.get()) cout << "SUCESS : original 4 CharRecognizer Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
-	if(sequence2->equal(sequenceLoaded2)) cout << "SUCESS : original Selector Sequence matches loaded" << endl;
+	if(*sequence2.get() == *sequenceLoaded2.get()) cout << "SUCESS : original Selector Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
-	if(sequence3->equal(sequenceLoaded3)) cout << "SUCESS : original ExclusiveSelector Sequence matches loaded" << endl;
+	if(*sequence3.get() == *sequenceLoaded3.get()) cout << "SUCESS : original ExclusiveSelector Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
-	if(sequence4->equal(sequenceLoaded4)) cout << "SUCESS : original Loop Sequence matches loaded" << endl;
+	if(*sequence4.get() == *sequenceLoaded4.get()) cout << "SUCESS : original Loop Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
-	if(sequence5->equal(sequenceLoaded5)) cout << "SUCESS : original CharRange Sequence matches loaded" << endl;
+	if(*sequence5.get() == *sequenceLoaded5.get()) cout << "SUCESS : original CharRange Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
-	if(sequence6->equal(sequenceLoaded6)) cout << "SUCESS : original Literal Sequence matches loaded" << endl;
+	if(*sequence6.get() == *sequenceLoaded6.get()) cout << "SUCESS : original Literal Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
-	if(sequence7->equal(sequenceLoaded7)) cout << "SUCESS : original RecognizerPointer Sequence matches loaded" << endl;
+	if(*sequence7.get() == *sequenceLoaded7.get()) cout << "SUCESS : original RecognizerPointer Sequence matches loaded" << endl;
   else cout << "FAILED : original sequence does not match" << endl;
 
 

@@ -28,9 +28,9 @@
   static void char_recognizerpointer(void) {
     long savePosition = 0;
 
-        std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-        std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-        std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+        std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+        std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+        std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
     //RecognizerPointer with one CharRecognizer
@@ -67,9 +67,9 @@
   static void sel_recognizerpointer(void) {
     long savePosition = 0;
 
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
     	//RecognizerPointer with a selector of 4 characters
@@ -120,9 +120,9 @@
   }
   static void xsel_recognizerpointer(void) {
     long savePosition = 0;
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
     //RecognizerPointer with a selector of 4 characters
@@ -174,9 +174,9 @@
 static void loop_recognizerpointer(void) {
     long savePosition = 0;
 
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
     //RecognizerPointer with a loop of one character
 
@@ -218,9 +218,9 @@ static void loop_recognizerpointer(void) {
 
 static void sequence_recognizerpointer(void) {
     long savePosition = 0;
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
     //RecognizerPointer with a sequence of 4 characters
@@ -266,9 +266,9 @@ static void sequence_recognizerpointer(void) {
   static void literal_recognizerpointer(void) {
     long savePosition = 0;
 
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
     	// Selector with a Literal
@@ -305,9 +305,9 @@ static void sequence_recognizerpointer(void) {
   }
 static void xchar_recognizerpointer(void) {
     long savePosition = 0;
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
     //Selector with a CharRange
@@ -347,9 +347,9 @@ static void xchar_recognizerpointer(void) {
 static void recp_recognizerpointer(void) {
     long savePosition = 0;
 
-    std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-    std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+    std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+    std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
     shared_ptr<RecognizerPointer> recognizptr = make_shared<RecognizerPointer>();
     shared_ptr<RecognizerPointer> recognizptrCar = make_shared<RecognizerPointer>();

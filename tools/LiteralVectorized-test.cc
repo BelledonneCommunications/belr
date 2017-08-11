@@ -72,7 +72,7 @@ const shared_ptr<Literal> chaine = dynamic_pointer_cast<Literal>(Utils::literal(
 //verification du save and mload
 cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
-		if(chaine->equal(chaine_loaded)){
+		if(*chaine.get() == *chaine_loaded.get()){
     cout << "SUCESS : Literal matches loaded" << endl;
   }
   else{

@@ -17,9 +17,9 @@ using namespace std;
 long savePosition = 0;
 long loadPosition = 0;
 
-std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointersLoaded;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
 template<typename Out>
@@ -164,19 +164,19 @@ rcptrItBegin = (mRecognizerPointersLoaded.begin());
 
 	cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
-	if(selector1->equal(selectorLoaded1))  cout << "SUCESS : Character Selector matches loaded" << endl;
+	if(*(selector1.get()) == *(selectorLoaded1.get())) cout << "SUCESS : Character Selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
-	if(selector2->equal(selectorLoaded2))  cout << "SUCESS : Loop Selector matches loaded" << endl;
+	if(*selector2.get() == *selectorLoaded2.get()) cout << "SUCESS : Loop Selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
-	if(selector3->equal(selectorLoaded3))  cout << "SUCESS : Sequence Selector matches loaded" << endl;
+	if(*selector3.get() == *selectorLoaded3.get()) cout << "SUCESS : Sequence Selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
-	if(selector4->equal(selectorLoaded4))  cout << "SUCESS : CharRange Selector matches loaded" << endl;
+	if(*selector4.get() == *selectorLoaded4.get()) cout << "SUCESS : CharRange Selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
-	if(selector5->equal(selectorLoaded5))  cout << "SUCESS : Literal selector matches loaded" << endl;
+	if(*selector5.get() == *selectorLoaded5.get()) cout << "SUCESS : Literal selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
-	if(selector6->equal(selectorLoaded6))  cout << "SUCESS : ExclusiveSelector Selector matches loaded" << endl;
+	if(*selector6.get() == *selectorLoaded6.get()) cout << "SUCESS : ExclusiveSelector Selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
-	if(selector7->equal(selectorLoaded7))  cout << "SUCESS : RecognizerPointer Selector matches loaded" << endl;
+	if(*selector7.get()== *selectorLoaded7.get()) cout << "SUCESS : RecognizerPointer Selector matches loaded" << endl;
   else cout << "FAILED : original selector does not match" << endl;
 
 

@@ -19,11 +19,10 @@ long savePosition = 0;
 long loadPosition = 0;
 
 
-std::list<std::shared_ptr<Recognizer>> mRecognizerPointersLoaded;
-std::list<std::shared_ptr<Recognizer>> mRecognizerPointers;
+std::list<std::shared_ptr<RecognizerPointer>> mRecognizerPointers;
 
-std::list<shared_ptr<Recognizer>>::iterator rcptrItBegin ;
-std::list<shared_ptr<Recognizer>>::iterator rcptrItEnd ;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItBegin ;
+std::list<shared_ptr<RecognizerPointer>>::iterator rcptrItEnd ;
 
 
 template<typename Out>
@@ -160,7 +159,6 @@ int main(int argc, char *argv[]){
 
     rcptrItEnd = (mRecognizerPointers.end());
 
-    cout << "NO PROBLEMO HERMANO" << endl;
     remove("test-recon.bin");
 
 	  //SAVE AND LOAD
@@ -193,19 +191,19 @@ int main(int argc, char *argv[]){
 
 		cout << "*********VERIFIYING IF RECOGNIZERS MATCH*********" << endl;
 
-		if(recognizptr1->equal(recognizptrLoaded1))  cout << "SUCESS : Character RecognizerPointer matches loaded" << endl;
+		if(*recognizptr1.get() == *recognizptrLoaded1.get())  cout << "SUCESS : Character RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : Character RecognizerPointer does not match" << endl;
-		if(recognizptr2->equal(recognizptrLoaded2))  cout << "SUCESS : Selector RecognizerPointer matches loaded" << endl;
+		if(*recognizptr2.get() == *recognizptrLoaded2.get())  cout << "SUCESS : Selector RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : Selector RecognizerPointer does not match" << endl;
-		if(recognizptr3->equal(recognizptrLoaded3))  cout << "SUCESS : Loop RecognizerPointer matches loaded" << endl;
+		if(*recognizptr3.get() == *recognizptrLoaded3.get())  cout << "SUCESS : Loop RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : Loop RecognizerPointer does not match" << endl;
-		if(recognizptr4->equal(recognizptrLoaded4))  cout << "SUCESS : Sequence RecognizerPointer matches loaded" << endl;
+		if(*recognizptr4.get() == *recognizptrLoaded4.get())  cout << "SUCESS : Sequence RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : Sequence RecognizerPointer does not match" << endl;
-		if(recognizptr5->equal(recognizptrLoaded5))  cout << "SUCESS : CharRange RecognizerPointer matches loaded" << endl;
+		if(*recognizptr5.get() == *recognizptrLoaded5.get())  cout << "SUCESS : CharRange RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : CharRange RecognizerPointer does not match" << endl;
-    if(recognizptr6->equal(recognizptrLoaded6))  cout << "SUCESS : Literal RecognizerPointer matches loaded" << endl;
+    if(*recognizptr6.get() == *recognizptrLoaded6.get())  cout << "SUCESS : Literal RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : Literal RecognizerPointer does not match" << endl;
-		if(recognizptr7->equal(recognizptrLoaded7))  cout << "SUCESS : ExclusiveSelector RecognizerPointer matches loaded" << endl;
+		if(*recognizptr7.get() == *recognizptrLoaded7.get())  cout << "SUCESS : ExclusiveSelector RecognizerPointer matches loaded" << endl;
 	  else cout << "FAILED : ExclusiveSelector RecognizerPointer does not match" << endl;
 
 
