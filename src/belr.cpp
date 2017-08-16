@@ -1454,8 +1454,9 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 	it = mRules.begin();
 	while (it != mRules.end()/* && condition*/){
 		if(it->first == itComp->first){
-			if(!(it->second == itComp->second)){
+			if(!(*(it->second) == *(itComp->second))){
 				condition = false;
+				cout << "MERDE" << endl;
 			}
 		}
 		else{
@@ -1472,7 +1473,7 @@ bool Grammar::equal(shared_ptr<Grammar> &gramCompared){
 		string firstRule = (*itRcp)->getName();
 		string secondRule = (*itRcpComp)->getName();
 		if (!firstRule.compare(secondRule)){
-			if (!((*itRcp)->getPointed() == (*itRcpComp)->getPointed())){
+			if (!(*(*itRcp)->getPointed() == *(*itRcpComp)->getPointed())){
 				condition =  false;
 			}
 		}

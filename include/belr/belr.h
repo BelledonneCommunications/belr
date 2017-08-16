@@ -61,6 +61,9 @@ class RecognizerPointer;
 class Recognizer : public std::enable_shared_from_this<Recognizer>{
 public:
 	void setName(const std::string &name);
+	void setOnlyName(const std::string& name);
+	void setId(int Id);
+
 	const std::string &getName()const;
 	BELR_PUBLIC size_t feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
 	unsigned int getId()const{
@@ -75,9 +78,8 @@ public:
 	virtual void save(std::ofstream& fichier, long &savePos)=0;
 	virtual bool equal(const std::shared_ptr<Recognizer> &CR)=0;
 	virtual void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd)=0;
+	virtual bool operator==(Recognizer &CR)=0;
 
-	//DEBUG FUNCTION
-	virtual void printtype()=0;
 protected:
 	Recognizer() = default;
 
@@ -95,11 +97,8 @@ public:
 	void save(std::ofstream& fichier, long &savePos);
 	bool equal(const std::shared_ptr<Recognizer> &CR);
 	static std::shared_ptr<CharRecognizer> loadVect(std::vector<std::string>::const_iterator &inIter);
-	//DEBUG FUNCTION
-	void printtype();
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
-
-private:
+	bool operator==(Recognizer &CR);
 	virtual void _optimize(int recursionLevel);
 	virtual size_t _feed(const std::shared_ptr<ParserContextBase> &ctx, const std::string &input, size_t pos);
 	int mToRecognize;
@@ -112,10 +111,9 @@ public:
 	std::shared_ptr<Selector> addRecognizer(const std::shared_ptr<Recognizer> &element);
 	void save(std::ofstream& fichier, long &savePos);
 	bool equal(const std::shared_ptr<Recognizer> &SEL);
-	static std::shared_ptr<Selector> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd);
-	//DEBUG FUNCTION
-	void printtype();
+	static std::shared_ptr<Selector> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &CR);
 
 
 
@@ -133,11 +131,10 @@ class ExclusiveSelector : public Selector{
 public:
 	ExclusiveSelector();
 	void save(std::ofstream& fichier, long &savePos);
-	static std::shared_ptr<ExclusiveSelector> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd);
-	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
-	//DEBUG FUNCTION
-	void printtype();
+	static std::shared_ptr<ExclusiveSelector> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool equal(const std::shared_ptr<Recognizer> &CR);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &SEQ);
 
 
 private:
@@ -148,12 +145,11 @@ class Sequence : public Recognizer{
 public:
 	std::shared_ptr<Sequence> addRecognizer(const std::shared_ptr<Recognizer> &element);
 	virtual bool _getTransitionMap(TransitionMap *mask);
-	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
-	static std::shared_ptr<Sequence> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd);
-	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
-	//DEBUG FUNCTION
-	void printtype();
+	void save(std::ofstream& fichier, long &savePos);
+	static std::shared_ptr<Sequence> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool equal(const std::shared_ptr<Recognizer> &CR);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &SEQ);
 
 
 protected:
@@ -169,11 +165,9 @@ public:
 	virtual bool _getTransitionMap(TransitionMap *mask);
 	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
 	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
-	static std::shared_ptr<Loop> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd);
-
-	//DEBUG FUNCTION
-	void printtype();
+	static std::shared_ptr<Loop> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &SEQ);
 
 
 
@@ -199,12 +193,11 @@ public:
 class CharRange : public Recognizer{
 public:
 	CharRange(int begin, int end);
-	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	void save(std::ofstream& fichier, long &savePos);
 	static std::shared_ptr<CharRange> loadVect(std::vector<std::string>::const_iterator &inIter);
-	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
-	//DEBUG FUNCTION
-	void printtype();
+	bool equal(const std::shared_ptr<Recognizer> &CR);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &SEQ);
 
 
 
@@ -218,12 +211,11 @@ class Literal : public Recognizer{
 public:
 	Literal(const std::string &lit);
 	virtual bool _getTransitionMap(TransitionMap *mask);
-	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
+	void save(std::ofstream& fichier, long &savePos);
 	static std::shared_ptr<Literal> loadVect(std::vector<std::string>::const_iterator &inIter);
-	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
-	//DEBUG FUNCTION
-	void printtype();
+	bool equal(const std::shared_ptr<Recognizer> &CR);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &SEQ);
 
 
 private:
@@ -244,12 +236,11 @@ public:
 	RecognizerPointer();
 	std::shared_ptr<Recognizer> getPointed();
 	void setPointed(const std::shared_ptr<Recognizer> &r);
-	void save(std::ofstream& fichier, long &savePos); //MODIFIE PAR IYED
-	static std::shared_ptr<RecognizerPointer> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<Recognizer>>::iterator &rcptrIterEnd);
-	bool equal(const std::shared_ptr<Recognizer> &CR); //MODIFIE PAR IYED
-	//DEBUG FUNCTION
-	void printtype();
+	void save(std::ofstream& fichier, long &savePos);
+	static std::shared_ptr<RecognizerPointer> loadVect(std::vector<std::string>::const_iterator &inIter, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool equal(const std::shared_ptr<Recognizer> &CR);
 	void linkPointer(std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterBegin, std::list<std::shared_ptr<RecognizerPointer>>::iterator &rcptrIterEnd);
+	bool operator==(Recognizer &SEQ);
 
 private:
 	virtual void _optimize(int recursionLevel);
@@ -339,8 +330,7 @@ public:
 	BELR_PUBLIC static std::shared_ptr<Grammar> loadVectRulesMap(std::string fileName);
 //comare functions
 	bool equal(std::shared_ptr<Grammar> &gramCompared);
-//debug functions
-	void debugGrammar();
+
 
 private:
 	void assignRule(const std::string &name, const std::shared_ptr<Recognizer> &rule);
