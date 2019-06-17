@@ -46,7 +46,7 @@ endif()
 if(ENABLE_STATIC)
 	add_library(belr-static STATIC ${BELR_HEADER_FILES} ${BELR_SOURCE_FILES_C} ${BELR_SOURCE_FILES_CXX})
 	set_target_properties(belr-static PROPERTIES OUTPUT_NAME belr)
-	target_include_directories(belr-static PUBLIC ${BCTOOLBOX_CORE_INCLUDE_DIRS})
+#	target_include_directories(belr-static PUBLIC ${BCTOOLBOX_CORE_INCLUDE_DIRS})
 	target_link_libraries(belr-static INTERFACE ${LIBS})
 endif()
 if(ENABLE_SHARED)
@@ -66,8 +66,10 @@ if(ENABLE_SHARED)
 		)
 	endif()
 	set_target_properties(belr PROPERTIES VERSION ${BELR_SO_VERSION})
-	target_include_directories(belr PUBLIC ${BCTOOLBOX_CORE_INCLUDE_DIRS})
-	target_link_libraries(belr PRIVATE ${LIBS})
+	target_include_directories(belr INTERFACE
+		$<INSTALL_INTERFACE:include>
+	)
+	target_link_libraries(belr PRIVATE bctoolbox)
 	if(MSVC)
 		if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 			install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/belr.pdb
@@ -79,7 +81,7 @@ if(ENABLE_SHARED)
 endif()
 
 if(ENABLE_STATIC)
-	install(TARGETS belr-static EXPORT ${EXPORT_TARGETS_NAME}Targets
+	install(TARGETS belr-static EXPORT ${EXPORT_TARGET_NAME}Targets
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -87,7 +89,7 @@ if(ENABLE_STATIC)
 	)
 endif()
 if(ENABLE_SHARED)
-	install(TARGETS belr EXPORT ${EXPORT_TARGETS_NAME}Targets
+	install(TARGETS belr EXPORT ${EXPORT_TARGET_NAME}Targets
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

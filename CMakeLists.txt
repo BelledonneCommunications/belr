@@ -43,20 +43,13 @@ include(CheckSymbolExists)
 include(CMakePushCheckState)
 include(CheckCXXCompilerFlag)
 
-
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # find_package should be invoked here to check for libraries - however do NOT
 # call include_directories here (see below)
-
-if(LINPHONE_BUILDER_GROUP_EXTERNAL_SOURCE_PATH_BUILDERS)
-	set(BcToolbox_FIND_COMPONENTS tester)
-	include("${EP_bctoolbox_CONFIG_DIR}/BcToolboxConfig.cmake")
-else()
-	find_package(BcToolbox 0.0.5 REQUIRED OPTIONAL_COMPONENTS tester)
-endif()
+find_package(bctoolbox 0.0.5 REQUIRED OPTIONAL_COMPONENTS tester)
 
 set(LINK_FLAGS )
 
@@ -66,8 +59,8 @@ if(UNIX AND NOT APPLE)
 endif()
 
 include_directories(
-	include/
-	src/
+	include
+	src
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 if(MSVC)
@@ -118,19 +111,10 @@ if(BELR_CPPFLAGS)
 endif()
 add_definitions("-DBELR_EXPORTS")
 
-if(LINPHONE_BUILDER_GROUP_EXTERNAL_SOURCE_PATH_BUILDERS)
-	set(EXPORT_TARGETS_NAME "LinphoneBuilder")
-else()
-	set(EXPORT_TARGETS_NAME "belr")
-endif()
+set(EXPORT_TARGET_NAME "belr")
 
-if (CMAKE_CROSSCOMPILING)
-	set(BELR_GRAMMARS_DIR "${CMAKE_STAGING_PREFIX}/${CMAKE_INSTALL_DATADIR}/belr/grammars")
-	set(BELR_GRAMMARS_RELATIVE_DIR "${CMAKE_INSTALL_DATADIR}/belr/grammars")
-else()
-	set(BELR_GRAMMARS_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/belr/grammars")
-	set(BELR_GRAMMARS_RELATIVE_DIR "${CMAKE_INSTALL_DATADIR}/belr/grammars")
-endif()
+set(BELR_GRAMMARS_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/${EXPORT_TARGET_NAME}/grammars")
+set(BELR_GRAMMARS_RELATIVE_DIR "${CMAKE_INSTALL_DATADIR}/${EXPORT_TARGET_NAME}/grammars")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
@@ -144,20 +128,25 @@ if(ENABLE_TOOLS)
 endif()
 
 include(CMakePackageConfigHelpers)
-export(EXPORT ${EXPORT_TARGETS_NAME}Targets
-	FILE "${CMAKE_CURRENT_BINARY_DIR}/BelrTargets.cmake"
+set(EXPORT_TARGET_NAME belr)
+set(ConfigPackageLocation share/${EXPORT_TARGET_NAME}/cmake)
+
+export(EXPORT ${EXPORT_TARGET_NAME}Targets
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_TARGET_NAME}Targets.cmake"
 )
-configure_file(cmake/BelrConfig.cmake.in
-	"${CMAKE_CURRENT_BINARY_DIR}/BelrConfig.cmake"
-	@ONLY
+
+configure_package_config_file(cmake/BelrConfig.cmake.in
+	"${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_TARGET_NAME}Config.cmake"
+	INSTALL_DESTINATION ${ConfigPackageLocation}
+	NO_SET_AND_CHECK_MACRO
 )
-set(ConfigPackageLocation share/Belr/cmake)
-install(EXPORT ${EXPORT_TARGETS_NAME}Targets
-	FILE BelrTargets.cmake
+
+install(EXPORT ${EXPORT_TARGET_NAME}Targets
+	FILE ${EXPORT_TARGET_NAME}Targets.cmake
 	DESTINATION ${ConfigPackageLocation}
 )
 install(FILES
-	"${CMAKE_CURRENT_BINARY_DIR}/BelrConfig.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_TARGET_NAME}Config.cmake"
 	DESTINATION ${ConfigPackageLocation}
 )
 
