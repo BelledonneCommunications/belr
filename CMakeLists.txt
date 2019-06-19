@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 project(BELR VERSION 0.1.3 LANGUAGES C CXX)
 
 set(BELR_SO_VERSION "1")
@@ -28,7 +28,7 @@ set(BELR_SO_VERSION "1")
 option(ENABLE_SHARED "Build shared library." ON)
 option(ENABLE_STATIC "Build static library." ON)
 option(ENABLE_STRICT "Build with strict compile options." YES)
-option(ENABLE_TOOLS "Turn on or off compilation of tools." YES)
+option(ENABLE_TOOLS "Turn on or off compilation of tools." YES) 
 option(ENABLE_TESTS "Enable compilation of unit tests." YES)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -120,8 +120,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY
 
 add_subdirectory(include)
 add_subdirectory(src)
-if(ENABLE_TESTS AND BCTOOLBOX_TESTER_FOUND)
-	add_subdirectory(tester)
+if(ENABLE_TESTS)
+  add_subdirectory(tester)
 endif()
 if(ENABLE_TOOLS)
 	add_subdirectory(tools)
