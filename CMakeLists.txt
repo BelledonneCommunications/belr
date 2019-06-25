@@ -28,7 +28,7 @@ set(BELR_SO_VERSION "1")
 option(ENABLE_SHARED "Build shared library." ON)
 option(ENABLE_STATIC "Build static library." ON)
 option(ENABLE_STRICT "Build with strict compile options." YES)
-option(ENABLE_TOOLS "Turn on or off compilation of tools." YES) 
+option(ENABLE_TOOLS "Turn on or off compilation of tools." YES)
 option(ENABLE_TESTS "Enable compilation of unit tests." YES)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -87,7 +87,6 @@ else()
 	endif()
 	if(ENABLE_STRICT)
 		list(APPEND STRICT_OPTIONS_CPP "-Werror" "-Wextra" "-Wno-unused-parameter" "-fno-strict-aliasing")
-
 		CHECK_CXX_COMPILER_FLAG("-Wsuggest-override" SUGGEST_OVERRIDE)
 		if(SUGGEST_OVERRIDE)
 			list(APPEND STRICT_OPTIONS_CPP "-Wsuggest-override -Werror=suggest-override")
