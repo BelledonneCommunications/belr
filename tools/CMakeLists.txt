@@ -23,7 +23,7 @@
 if(ENABLE_SHARED)
 	set(BELR_LIBRARIES_FOR_TOOLS belr)
 else()
-	set(BELR_LIBRARIES_FOR_TOOLS belr-static)
+	set(BELR_LIBRARIES_FOR_TOOLS belr)
 endif()
 
 foreach(EXECUTABLE belr-parse belr-demo belr-compiler)

@@ -23,7 +23,7 @@
 if(ENABLE_SHARED)
 	set(BELR_LIBRARIES_FOR_TESTER belr)
 else()
-	set(BELR_LIBRARIES_FOR_TESTER belr-static)
+	set(BELR_LIBRARIES_FOR_TESTER belr)
 endif()
 
 set(GRAMMAR_FILES
