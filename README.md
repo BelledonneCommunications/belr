@@ -24,7 +24,7 @@ The benefits of using belr are:
 License
 =======
 
-<Copyright © Belledonne Communications>
+Copyright © [Belledonne Communications SARL (https://www.linphone.org)], all rights reserved.
 
 Belr is dual licensed:
 - under a GNU GPLv3 license for free (see LICENSE.txt file for details)
@@ -45,8 +45,8 @@ shared_ptr<Grammar> grammar=builder.createFromAbnfFile("sipgrammar.txt", make_sh
 ```
 
 Then, from the grammar object returned, instanciate a parser object, by telling belr the name of a base class you have defined
-to represent the elements of the language. In the example below, it is called `SipElement`.
-The parser object can be used as much time as needed. There is no no need to re-instanciate it each time you need to parse a new input.
+to represent any element of the language. In the example below, it is called `SipElement`.
+The parser object can be used as much time as needed. There is no no need to re-instanciate it each time you need to parse a new input !
 
 ```
 ABNFGrammarBuilder builder;
@@ -74,7 +74,7 @@ Finally, you can now parse a SIP-URI:
 size_t parsedSize;
 string inputToParse = "sip:bob@sip.example.org";
 shared_ptr<SipElement> ret = parser.parseInput("SIP-URI", inputToParse , &parsedSize);
-//if the sip uri is recognized, the return value is non null and can cast it into a SipUri object.
+//if the sip uri is recognized, the return value is non null and you can cast it into a SipUri object.
 if (ret){
 	shared_ptr<SipUri> sipUri = dynamic_pointer_cast<SipUri>(ret);
 	// Do what you want with the SipUri object...
@@ -117,7 +117,7 @@ It is non-deterministic: when the automaton finds a "!", it can recognize it as 
 element of `my-element`.
 
 Unfortunately it is not so rare to encounter this kind of situation.
-Belr's current logic will be to include the "!" into `token`, all the time, because this is the first one that matches.
+Belr's current logic will be to include the "!" into `token`, all the time, because this is the first one that matches in the sequence.
 
 The solution for this would be to have belr explore both possibilities, however this is not implemented as of today (2019-09-17).
 Most of time, a workaround exists by re-writing the problematic grammar rule in such a way that it is no longer this ambiguity.
