@@ -26,6 +26,8 @@
 #include <vector>
 #include <sstream>
 
+#include "bctoolbox/defs.h"
+
 #include "belr.h"
 
 // =============================================================================
@@ -70,7 +72,7 @@ private:
 		mFunc(universal_pointer_cast<typename _functorT::first_argument_type>(obj), value);
 	}
 	template <typename _valueT>
-	inline void _invokeWithValue(_parserElementT obj, typename std::enable_if<std::is_convertible<_valueT, _parserElementT>::value, const std::string&>::type value){
+	inline void _invokeWithValue(_parserElementT, typename std::enable_if<std::is_convertible<_valueT, _parserElementT>::value, const std::string&>::type){
 		// no op.
 	}
 	#if defined(_MSC_VER)
@@ -89,13 +91,13 @@ private:
 		mFunc(universal_pointer_cast<typename _functorT::first_argument_type>(obj), std::atof(value.c_str()));
 	}
 	template <typename _valueT>
-	inline void _invokeWithChild(_parserElementT obj, typename std::enable_if<std::is_convertible<_valueT, std::string>::value, _parserElementT>::type child){
+	inline void _invokeWithChild(_parserElementT, typename std::enable_if<std::is_convertible<_valueT, std::string>::value, _parserElementT>::type){
 	}
 	template <typename _valueT>
-	inline void _invokeWithChild(_parserElementT obj, typename std::enable_if<std::is_integral<_valueT>::value, _parserElementT>::type child){
+	inline void _invokeWithChild(_parserElementT, typename std::enable_if<std::is_integral<_valueT>::value, _parserElementT>::type){
 	}
 	template <typename _valueT>
-	inline void _invokeWithChild(_parserElementT obj, typename std::enable_if<std::is_floating_point<_valueT>::value, _parserElementT>::type child){
+	inline void _invokeWithChild(_parserElementT, typename std::enable_if<std::is_floating_point<_valueT>::value, _parserElementT>::type){
 	}
 	template <typename _valueT>
 	inline void _invokeWithChild(
@@ -162,7 +164,7 @@ private:
 		return mHandlerCreateFunc(this->getRulename(), value.substr(begin, count));
 	}
 	template <typename _funcT>
-	typename std::enable_if<std::is_convertible<_funcT, std::function<_derivedParserElementT()>>::value, _derivedParserElementT>::type _invoke(const std::string &value, size_t begin, size_t count){
+	typename std::enable_if<std::is_convertible<_funcT, std::function<_derivedParserElementT()>>::value, _derivedParserElementT>::type _invoke(const std::string &, size_t, size_t){
 		return mHandlerCreateFunc();
 	}
 	_createElementFn mHandlerCreateFunc;
@@ -513,7 +515,7 @@ inline void ParserContext<_parserElementT>::_beginParse(ParserLocalContext & lct
 }
 
 template <typename _parserElementT>
-inline  void ParserContext<_parserElementT>::_endParse(const ParserLocalContext &localctx, const std::string &input, size_t begin, size_t count){
+inline  void ParserContext<_parserElementT>::_endParse(const ParserLocalContext &localctx, const std::string &, size_t begin, size_t count){
 	if (localctx.mHandlerContext){
 		mHandlerStack.pop_back();
 		if (count!=std::string::npos && count>0){

@@ -19,6 +19,7 @@
 
 #include <fstream>
 
+#include <bctoolbox/defs.h>
 #include <bctoolbox/logging.h>
 
 #include "belr/abnf.h"
@@ -36,7 +37,7 @@ shared_ptr< ABNFNumval > ABNFNumval::create(){
 	return make_shared<ABNFNumval>();
 }
 
-shared_ptr< Recognizer > ABNFNumval::buildRecognizer(const shared_ptr< Grammar >& grammar){
+shared_ptr< Recognizer > ABNFNumval::buildRecognizer(UNUSED(const shared_ptr< Grammar >& grammar)){
 	if (mIsRange){
 		return Utils::char_range(mValues[0],mValues[1]);
 	}else{

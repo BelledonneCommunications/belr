@@ -17,6 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <bctoolbox/defs.h>
+
 #include "common.h"
 #include "binarystream.h"
 #include "belr/parser.h"
@@ -34,16 +36,16 @@ void fatal(const char *message){
  * instanciating anything.*/
 class DummyParserContext : public ParserContextBase{
 public:
-	virtual void beginParse(ParserLocalContext &ctx, const std::shared_ptr<Recognizer> &rec) override{
+	virtual void beginParse(UNUSED(ParserLocalContext &ctx), UNUSED(const std::shared_ptr<Recognizer> &rec)) override{
 	}
-	virtual void endParse(const ParserLocalContext &ctx, const std::string &input, size_t begin, size_t count) override{
+	virtual void endParse(UNUSED(const ParserLocalContext &ctx), UNUSED(const std::string &input), UNUSED(size_t begin), UNUSED(size_t count)) override{
 	}
 	virtual std::shared_ptr<HandlerContextBase> branch() override{
 		return nullptr;
 	}
-	virtual void merge(const std::shared_ptr<HandlerContextBase> &other) override{
+	virtual void merge(UNUSED(const std::shared_ptr<HandlerContextBase> &other)) override{
 	}
-	virtual void removeBranch(const std::shared_ptr<HandlerContextBase> &other) override{
+	virtual void removeBranch(UNUSED(const std::shared_ptr<HandlerContextBase> &other)) override{
 	}
 };
 
@@ -256,7 +258,7 @@ CharRecognizer::CharRecognizer(int to_recognize, bool caseSensitive) : mToRecogn
 	}
 }
 
-size_t CharRecognizer::_feed(ParserContextBase &ctx, const string &input, size_t pos){
+size_t CharRecognizer::_feed(UNUSED(ParserContextBase &ctx), const string &input, size_t pos){
 	int c = (unsigned char)input[pos];
 	if (mCaseSensitive){
 		return c == mToRecognize ? 1 : string::npos;
@@ -264,7 +266,7 @@ size_t CharRecognizer::_feed(ParserContextBase &ctx, const string &input, size_t
 	return ::tolower(c) == mToRecognize ? 1 : string::npos;
 }
 
-void CharRecognizer::_optimize(int recursionLevel){
+void CharRecognizer::_optimize(UNUSED(int recursionLevel)){
 
 }
 
@@ -505,13 +507,13 @@ void Loop::_optimize(int recursionLevel){
 CharRange::CharRange(int begin, int end) : mBegin(begin), mEnd(end){
 }
 
-size_t CharRange::_feed(ParserContextBase &ctx, const string &input, size_t pos){
+size_t CharRange::_feed(UNUSED(ParserContextBase &ctx), const string &input, size_t pos){
 	int c = (unsigned char)input[pos];
 	if (c >= mBegin && c <= mEnd) return 1;
 	return string::npos;
 }
 
-void CharRange::_optimize(int recursionLevel){
+void CharRange::_optimize(UNUSED(int recursionLevel)){
 
 }
 
@@ -553,7 +555,7 @@ Literal::Literal(const string& lit) : mLiteral(tolower(lit)), mLiteralSize(mLite
 
 }
 
-size_t Literal::_feed(ParserContextBase &ctx, const string& input, size_t pos){
+size_t Literal::_feed(UNUSED(ParserContextBase &ctx), const string& input, size_t pos){
 	size_t i;
 	for(i=0;i<mLiteralSize;++i){
 		if (::tolower(input[pos+i])!=mLiteral[i]) return string::npos;
@@ -570,7 +572,7 @@ Literal::Literal(BinaryGrammarBuilder &istr) : Recognizer(istr){
 	mLiteralSize = mLiteral.size();
 }
 
-void Literal::_optimize(int recursionLevel){
+void Literal::_optimize(UNUSED(int recursionLevel)){
 
 }
 
@@ -601,7 +603,7 @@ size_t RecognizerPointer::_feed(ParserContextBase &ctx, const string &input, siz
 	return string::npos;
 }
 
-void RecognizerPointer::_serialize(BinaryOutputStream &fstr){
+void RecognizerPointer::_serialize(UNUSED(BinaryOutputStream &fstr)){
 	bctbx_fatal("The RecognizerPointer is not supposed to be serialized.");
 }
 
@@ -614,7 +616,7 @@ void RecognizerPointer::setPointed(const shared_ptr<Recognizer> &r){
 	mRecognizer=r;
 }
 
-void RecognizerPointer::_optimize(int recursionLevel){
+void RecognizerPointer::_optimize(UNUSED(int recursionLevel)){
 	/*do not call optimize() on the pointed value to avoid a loop.
 	 * The grammar will do it for all rules anyway*/
 }
@@ -646,7 +648,7 @@ void RecognizerAlias::setPointed(const shared_ptr<Recognizer> &r){
 	mRecognizer=r;
 }
 
-void RecognizerAlias::_optimize(int recursionLevel){
+void RecognizerAlias::_optimize(UNUSED(int recursionLevel)){
 	/*do not call optimize() on the pointed value to avoid a loop.
 	 * The grammar will do it for all rules anyway*/
 }
