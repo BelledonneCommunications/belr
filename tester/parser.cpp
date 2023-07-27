@@ -301,5 +301,6 @@ test_suite_t parser_suite = {
 	NULL,
 	NULL,
 	sizeof(tests) / sizeof(tests[0]),
-	tests
+	tests,
+	0
 };
