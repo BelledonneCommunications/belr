@@ -53,8 +53,6 @@ endif()
 # call include_directories here (see below)
 find_package(BCToolbox 5.3.0 REQUIRED OPTIONAL_COMPONENTS tester)
 
-set(LINK_FLAGS )
-
 if(UNIX AND NOT APPLE)
 	include(CheckIncludeFiles)
 	check_include_files(libudev.h HAVE_LIBUDEV_H)
